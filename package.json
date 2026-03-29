@@ -1,0 +1,25 @@
+{
+  "name": "synced-hub",
+  "version": "0.1.0",
+  "description": "WordPress agency local development environment CLI",
+  "type": "module",
+  "bin": {
+    "synced": "./bin/synced.js"
+  },
+  "scripts": {
+    "start": "node bin/synced.js",
+    "dev": "node bin/synced.js"
+  },
+  "dependencies": {
+    "@octokit/rest": "^21.0.2",
+    "chalk": "^5.3.0",
+    "commander": "^12.1.0",
+    "enquirer": "^2.4.1",
+    "execa": "^9.5.1"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "keywords": ["wordpress", "agency", "cli", "local-development"],
+  "license": "MIT"
+}
