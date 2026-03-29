@@ -26,7 +26,7 @@ export async function setupCommand(options = {}) {
 
   logger.title('Synced Hub — First Run Setup');
   logger.divider();
-  logger.info('Prerequisites: Git, Node.js 18+, and a GitHub account with a Personal Access Token.');
+  logger.info('Prerequisites: Git, Node.js 22+, and a GitHub account with a Personal Access Token.');
   logger.info('Get your token at: https://github.com/settings/tokens (scope: repo)');
   logger.blank();
 

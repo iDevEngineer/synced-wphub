@@ -13,7 +13,7 @@ The CLI for Synced — AI-driven WordPress development. One command to go from z
 These must be in place before installing Synced:
 
 - **Git** — installed and in PATH
-- **Node.js 18+**
+- **Node.js 22+**
 - **GitHub account** with a Personal Access Token (repo scope) — [create one here](https://github.com/settings/tokens)
 - **VS Code** (`code` in PATH — optional, for auto-open)
 
