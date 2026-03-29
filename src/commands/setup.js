@@ -26,6 +26,9 @@ export async function setupCommand(options = {}) {
 
   logger.title('Synced Hub — First Run Setup');
   logger.divider();
+  logger.info('Prerequisites: Git, Node.js 18+, and a GitHub account with a Personal Access Token.');
+  logger.info('Get your token at: https://github.com/settings/tokens (scope: repo)');
+  logger.blank();
 
   // 1. Sites directory
   const sitesPath = await input(
@@ -33,20 +36,14 @@ export async function setupCommand(options = {}) {
     '~/synced-sites'
   );
 
-  // 2. GitHub
-  const connectGitHub = await confirm('Connect GitHub? (recommended)', true);
+  // 2. GitHub PAT — required for repo creation
+  const token = await password('GitHub Personal Access Token (repo scope):');
   let github = { connected: false, token: null };
-
-  if (connectGitHub) {
-    logger.info('Create a Personal Access Token at https://github.com/settings/tokens');
-    logger.info('Required scope: repo');
-    const token = await password('Enter your GitHub Personal Access Token:');
-    if (token && token.trim()) {
-      github = { connected: true, token: token.trim() };
-      logger.success('GitHub token saved.');
-    } else {
-      logger.warn('No token provided — GitHub integration skipped.');
-    }
+  if (token && token.trim()) {
+    github = { connected: true, token: token.trim() };
+    logger.success('GitHub token saved.');
+  } else {
+    logger.warn('No token provided — repos will not be created automatically. You can re-run setup to add it later.');
   }
 
   // 3. AI provider

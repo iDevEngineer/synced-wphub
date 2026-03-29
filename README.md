@@ -8,12 +8,14 @@ The CLI for Synced — AI-driven WordPress development. One command to go from z
 - **`synced theme "Client Name"`** — update brand colours for an existing site
 - **`synced setup`** — first-run configuration (sites path, GitHub, AI provider)
 
-## Requirements
+## Prerequisites
 
-- Node.js 18+
-- Git
-- GitHub account with a Personal Access Token (repo scope)
-- VS Code (`code` in PATH — optional)
+These must be in place before installing Synced:
+
+- **Git** — installed and in PATH
+- **Node.js 18+**
+- **GitHub account** with a Personal Access Token (repo scope) — [create one here](https://github.com/settings/tokens)
+- **VS Code** (`code` in PATH — optional, for auto-open)
 
 ## Installation
 
