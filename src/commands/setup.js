@@ -30,7 +30,7 @@ export async function setupCommand(options = {}) {
   // 1. Sites directory
   const sitesPath = await input(
     'Where would you like to store your sites?',
-    '~/Sites/Synced'
+    '~/synced-sites'
   );
 
   // 2. GitHub
