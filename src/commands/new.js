@@ -1,7 +1,7 @@
 import { mkdirSync, existsSync, writeFileSync } from 'fs';
 import { join } from 'path';
 import { readConfig, getSitePath } from '../lib/config.js';
-import { cloneBoiled, renameBoiledPlaceholders, applyBrandColours } from '../lib/boilerplate.js';
+import { cloneStarterTheme, renameThemePlaceholders, applyBrandColours } from '../lib/boilerplate.js';
 import { createRepo, initAndPush, getGitHubUser } from '../lib/github.js';
 import { startWordPress } from '../lib/wordpress.js';
 import { logger } from '../utils/logger.js';
@@ -18,7 +18,7 @@ const DEFAULT_COLOURS = {
 /**
  * synced new "Client Name"
  *
- * Creates a new WordPress site with the Boiled starter theme.
+ * Creates a new WordPress site using the Synced WP starter theme.
  */
 export async function newCommand(clientName) {
   if (!clientName || !clientName.trim()) {
@@ -27,7 +27,7 @@ export async function newCommand(clientName) {
   }
 
   clientName = clientName.trim();
-  const slug = clientName.toLowerCase().replace(/[^a-z0-9]/g, '');
+  const slug = clientName.toLowerCase().replace(/[^a-z0-9]/g, '-').replace(/-+/g, '-').replace(/^-|-$/g, '');
 
   // 1. Check config
   let config = readConfig();
@@ -61,9 +61,9 @@ export async function newCommand(clientName) {
   const themePath = join(themesPath, slug);
   mkdirSync(themesPath, { recursive: true });
 
-  // 3. Clone Boiled
+  // 3. Clone Synced WP theme
   try {
-    await cloneBoiled(themePath);
+    await cloneStarterTheme(themePath);
   } catch (err) {
     logger.error(err.message);
     process.exit(1);
@@ -71,7 +71,7 @@ export async function newCommand(clientName) {
 
   // 4. Rename placeholders
   try {
-    renameBoiledPlaceholders(themePath, clientName);
+    renameThemePlaceholders(themePath, clientName);
   } catch (err) {
     logger.warn(`Placeholder rename issue: ${err.message}`);
   }
@@ -180,10 +180,10 @@ function generateAgentsMd(clientName, slug, sitePath, colours) {
 ## Stack
 
 - **CMS:** WordPress (via wp-now)
-- **Theme:** ${clientName} (Boiled starter)
+- **Theme:** ${clientName}
 - **Theme path:** wp-content/themes/${slug}/
-- **Build tool:** Vite (check theme package.json)
-- **CSS:** Custom properties in assets/src/hatched.css
+- **Build tool:** Vite
+- **CSS:** Tailwind v4 with custom properties in assets/src/css/variables.css
 
 ## Brand Colours
 
@@ -223,20 +223,19 @@ This is a WordPress site for **${clientName}**, scaffolded by Synced Hub.
 
 - **Name:** ${clientName}
 - **Path:** \`wp-content/themes/${slug}/\`
-- **Base:** Boiled starter theme by Hatched Agency
-- **CSS variables:** \`wp-content/themes/${slug}/assets/src/hatched.css\`
+- **CSS variables:** \`wp-content/themes/${slug}/assets/src/css/variables.css\`
 
 ## Working with this project
 
 - Theme files are in \`wp-content/themes/${slug}/\`
-- CSS custom properties control colours — edit \`assets/src/hatched.css\`
+- CSS custom properties control colours — edit \`assets/src/css/variables.css\`
 - Run \`npm run dev\` in the theme directory to watch for asset changes
 - WordPress runs locally via \`npx @wp-now/wp-now start --path=${sitePath}\`
 
 ## Conventions
 
 - PHP: WordPress coding standards
-- CSS: Custom properties, BEM class naming
+- CSS: Tailwind v4, CSS custom properties
 - JS: ES modules, minimal framework use
 `;
 }
