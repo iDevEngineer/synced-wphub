@@ -38,7 +38,7 @@ synced setup
 ```
 
 Configures:
-1. Where to store your sites (default: `~/synced-sites`)
+1. Where to store your sites (default: `~/Synced-Sites`)
 2. GitHub Personal Access Token for repo creation (your own token, your repos)
 3. AI provider (Claude / ChatGPT/Codex / Other)
 
@@ -53,7 +53,7 @@ synced new "Acme Corp"
 ```
 
 This will:
-1. Create `~/synced-sites/acme-corp/`
+1. Create `~/Synced-Sites/acme-corp/`
 2. Install the Synced WP starter theme into `wp-content/themes/acme-corp/`
 3. Rename theme placeholders to the client name
 4. Ask for brand colours (or use neutral defaults — update later with `synced theme`)
@@ -81,7 +81,7 @@ Updates brand colours and commits if GitHub is connected.
 
 ```json
 {
-  "sitesPath": "~/synced-sites",
+  "sitesPath": "~/Synced-Sites",
   "github": {
     "token": "ghp_...",
     "connected": true
