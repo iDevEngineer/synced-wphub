@@ -159,10 +159,10 @@ export async function newCommand(clientName) {
     }
   }
 
-  // 7. AGENTS.md
-  const agentsMd = generateAgentsMd(clientName, slug, sitePath, colours);
-  writeFileSync(join(sitePath, 'AGENTS.md'), agentsMd, 'utf8');
-  logger.step('Created AGENTS.md');
+  // 7. SYNCED.md
+  const agentsMd = generateSyncedMd(clientName, slug, sitePath, colours);
+  writeFileSync(join(sitePath, 'SYNCED.md'), agentsMd, 'utf8');
+  logger.step('Created SYNCED.md');
 
   // 8. CLAUDE.md (if AI = claude)
   if (config.ai === 'claude') {
@@ -216,8 +216,8 @@ export async function newCommand(clientName) {
 
 // ─── Template generators ─────────────────────────────────────────────────────
 
-function generateAgentsMd(clientName, slug, sitePath, colours) {
-  return `# AGENTS.md — ${clientName}
+function generateSyncedMd(clientName, slug, sitePath, colours) {
+  return `# SYNCED.md — ${clientName}
 
 ## IMPORTANT: WordPress Environment
 
@@ -372,7 +372,7 @@ function generateClaudeMd(clientName, slug, sitePath) {
 ## Project
 
 WordPress site for **${clientName}**, scaffolded by Synced Hub.
-Read \`AGENTS.md\` for full environment details and constraints.
+Read \`SYNCED.md\` for full environment details and constraints.
 
 ## Theme
 
