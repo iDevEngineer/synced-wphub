@@ -11,6 +11,9 @@ import { newCommand } from '../src/commands/new.js';
 import { themeCommand } from '../src/commands/theme.js';
 import { uninstallCommand } from '../src/commands/uninstall.js';
 import { deployCommand } from '../src/commands/deploy.js';
+import { startCommand } from '../src/commands/start.js';
+import { stopCommand } from '../src/commands/stop.js';
+import { listCommand } from '../src/commands/list.js';
 
 // Read version from package.json
 const __dirname = dirname(fileURLToPath(import.meta.url));
@@ -83,11 +86,50 @@ program
     }
   });
 
+program
+  .command('start <clientName>')
+  .description('Start a local WordPress site')
+  .action(async (clientName) => {
+    try {
+      await startCommand(clientName);
+    } catch (err) {
+      console.error('Start failed:', err.message);
+      process.exit(1);
+    }
+  });
+
+program
+  .command('stop <clientName>')
+  .description('Stop a running WordPress site')
+  .action(async (clientName) => {
+    try {
+      await stopCommand(clientName);
+    } catch (err) {
+      console.error('Stop failed:', err.message);
+      process.exit(1);
+    }
+  });
+
+program
+  .command('list')
+  .description('List all local sites and their status')
+  .action(async () => {
+    try {
+      await listCommand();
+    } catch (err) {
+      console.error('List failed:', err.message);
+      process.exit(1);
+    }
+  });
+
 // Show help if no command provided
 program.addHelpText('after', `
 Examples:
   $ synced setup
   $ synced new "Acme Corp"
+  $ synced start "Acme Corp"
+  $ synced stop "Acme Corp"
+  $ synced list
   $ synced theme "Acme Corp"
   $ synced deploy "Acme Corp"
 `);
