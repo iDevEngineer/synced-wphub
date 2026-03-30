@@ -56,28 +56,17 @@ export async function newCommand(clientName) {
   logger.step(`Creating site directory: ${sitePath}`);
   mkdirSync(sitePath, { recursive: true });
 
-  // 3. Download WordPress core via WP-CLI
-  logger.step('Downloading WordPress...');
-  try {
-    await execa('wp', [
-      'core', 'download',
-      `--path=${sitePath}`,
-      '--skip-content',
-      '--quiet',
-    ]);
-    logger.success('WordPress core downloaded.');
-  } catch (err) {
-    logger.error(`Failed to download WordPress: ${err.message}`);
-    logger.info('Ensure WP-CLI is installed: https://wp-cli.org/#installing');
-    process.exit(1);
-  }
-
-  // WordPress wp-content/themes directory
-  const themesPath = join(sitePath, 'wp-content', 'themes');
+  // 3. Create wp-content structure
+  // wp-now detects wp-content mode from plugins + themes dirs being present.
+  // It downloads WordPress core automatically — no WP-CLI needed.
+  const wpContentPath = join(sitePath, 'wp-content');
+  const themesPath = join(wpContentPath, 'themes');
+  const pluginsPath = join(wpContentPath, 'plugins');
   const themePath = join(themesPath, slug);
   mkdirSync(themesPath, { recursive: true });
+  mkdirSync(pluginsPath, { recursive: true });
 
-  // 5. Clone Synced WP theme
+  // 4. Clone Synced WP theme
   try {
     await cloneStarterTheme(themePath);
   } catch (err) {
@@ -164,13 +153,14 @@ export async function newCommand(clientName) {
     }
   }
 
-  // 10. Start WordPress
+  // 10. Start WordPress — point wp-now at wp-content dir (wp-content mode)
+  const wpContentPath2 = join(sitePath, 'wp-content');
   let localUrl = 'http://localhost:8881';
   try {
-    localUrl = await startWordPress(sitePath);
+    localUrl = await startWordPress(wpContentPath2);
   } catch (err) {
     logger.warn(`WordPress start failed: ${err.message}`);
-    logger.info('You can start it manually: npx @wp-now/wp-now start --path=' + sitePath);
+    logger.info('Start manually: npx @wp-now/wp-now start --path=' + wpContentPath2);
   }
 
   // 11. Open VS Code
@@ -222,7 +212,7 @@ function generateAgentsMd(clientName, slug, sitePath, colours) {
 # Start WordPress (SQLite, no MySQL needed)
 synced start "${clientName}"
 # or manually:
-npx @wp-now/wp-now start --path=${sitePath} --skip-browser
+npx @wp-now/wp-now start --path=${sitePath}/wp-content --skip-browser
 
 # Watch theme for changes
 cd wp-content/themes/${slug}
