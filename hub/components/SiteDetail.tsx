@@ -258,7 +258,7 @@ function OverviewTab({ site, isRunning, wpAdminUrl }: OverviewTabProps) {
 
   return (
     <div style={{ display: 'flex', gap: '40px' }}>
-      {/* Left: Theme thumbnail placeholder */}
+      {/* Left: Theme screenshot */}
       <div style={{ flexShrink: 0, width: '160px' }}>
         <div
           style={{
@@ -267,15 +267,28 @@ function OverviewTab({ site, isRunning, wpAdminUrl }: OverviewTabProps) {
             backgroundColor: '#242830',
             border: '1px solid #3d4147',
             borderRadius: '6px',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
+            overflow: 'hidden',
           }}
         >
-          <span style={{ fontSize: '12px', color: '#6b7280' }}>Theme preview</span>
+          <img
+            src={`/api/sites/${site.slug}/screenshot`}
+            alt="Theme screenshot"
+            style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
+            onError={(e) => {
+              const el = e.currentTarget;
+              el.style.display = 'none';
+              const parent = el.parentElement;
+              if (parent) {
+                parent.style.display = 'flex';
+                parent.style.alignItems = 'center';
+                parent.style.justifyContent = 'center';
+                parent.innerHTML = '<span style="font-size:12px;color:#6b7280">No preview</span>';
+              }
+            }}
+          />
         </div>
         <p style={{ fontSize: '12px', color: '#9ca3af', marginTop: '8px', textAlign: 'center' }}>
-          Synced WP Theme
+          Active theme
         </p>
       </div>
 
