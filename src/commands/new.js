@@ -195,23 +195,26 @@ export async function newCommand(clientName) {
     }
   }
 
-  // 10. Start WordPress — point at wp-content dir (wp-content mode)
-  // wp-now manages WordPress core itself, no wp-config.php needed
-  const blueprintPath = join(wpContentPath, 'blueprint.json');
-
-  // Move blueprint into wp-content where wp-now can find it
-  try {
-    await execa('mv', [join(sitePath, 'blueprint.json'), blueprintPath]);
-  } catch {
-    // already there or doesn't exist — non-fatal
+  // 10. Copy wp-config-sample.php → wp-config.php so wp-now can use it
+  const wpConfigSample = join(sitePath, 'wp-config-sample.php');
+  const wpConfig = join(sitePath, 'wp-config.php');
+  if (existsSync(wpConfigSample) && !existsSync(wpConfig)) {
+    try {
+      await execa('cp', [wpConfigSample, wpConfig]);
+      logger.step('Created wp-config.php');
+    } catch (err) {
+      logger.warn(`Could not create wp-config.php: ${err.message}`);
+    }
   }
 
+  // 11. Start WordPress (wordpress mode — full WP install with wp-admin etc.)
+  const blueprintPath = join(sitePath, 'blueprint.json');
   let localUrl = 'http://localhost:8881';
   try {
-    localUrl = await startWordPress(wpContentPath, 8881, blueprintPath, true);
+    localUrl = await startWordPress(sitePath, 8881, blueprintPath, true);
   } catch (err) {
     logger.warn(`WordPress start failed: ${err.message}`);
-    logger.info('Start manually: npx @wp-now/wp-now start --path=' + wpContentPath);
+    logger.info('Start manually: npx @wp-now/wp-now start --path=' + sitePath);
   }
 
   // 11. Open VS Code
