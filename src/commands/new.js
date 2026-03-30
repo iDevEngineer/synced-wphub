@@ -83,15 +83,20 @@ export async function newCommand(clientName) {
   mkdirSync(themesPath, { recursive: true });
   mkdirSync(pluginsPath, { recursive: true });
 
-  // Write a Blueprint to activate our theme — used by wp-now on first start
-  const blueprint = {
-    steps: [{ step: 'activateTheme', themeFolderName: slug }],
-  };
-  writeFileSync(
-    join(sitePath, 'blueprint.json'),
-    JSON.stringify(blueprint, null, 2),
-    'utf8'
-  );
+  // Remove bundled themes except twentytwentyfive (keep as safe fallback)
+  logger.step('Removing unused default themes...');
+  try {
+    const { stdout } = await execa('ls', [themesPath]);
+    const bundled = stdout.trim().split('\n').filter(t =>
+      t.startsWith('twenty') && t !== 'twentytwentyfive'
+    );
+    for (const theme of bundled) {
+      await execa('rm', ['-rf', join(themesPath, theme)]);
+    }
+    if (bundled.length) logger.success(`Removed: ${bundled.join(', ')}`);
+  } catch {
+    // non-fatal
+  }
 
   // 4. Clone Synced WP theme
   try {
@@ -177,17 +182,28 @@ export async function newCommand(clientName) {
     }
   }
 
-  // 10. Start WordPress — point wp-now at site root (wordpress mode — full WP install)
-  const blueprintPath = join(sitePath, 'blueprint.json');
+  // 10. Start WordPress
   let localUrl = 'http://localhost:8881';
   try {
-    localUrl = await startWordPress(sitePath, 8881, blueprintPath);
+    localUrl = await startWordPress(sitePath, 8881);
   } catch (err) {
     logger.warn(`WordPress start failed: ${err.message}`);
     logger.info('Start manually: npx @wp-now/wp-now start --path=' + sitePath);
   }
 
-  // 11. Open VS Code
+  // 11. Activate our theme via WP-CLI
+  logger.step(`Activating theme: ${slug}...`);
+  try {
+    await execa('wp', ['theme', 'activate', slug, `--path=${sitePath}`], {
+      env: { ...process.env, WP_CLI_ALLOW_ROOT: '1' },
+    });
+    logger.success(`Theme "${slug}" activated.`);
+  } catch (err) {
+    logger.warn(`Could not auto-activate theme: ${err.message}`);
+    logger.info(`Activate manually: http://localhost:8881/wp-admin → Appearance → Themes`);
+  }
+
+  // 12. Open VS Code
   try {
     logger.step('Opening VS Code...');
     execa('code', [sitePath], { detached: true, stdio: 'ignore' }).unref();
