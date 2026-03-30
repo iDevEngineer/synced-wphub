@@ -144,19 +144,18 @@ export async function newCommand(clientName) {
     logger.warn(`Could not apply colours: ${err.message}`);
   }
 
-  // 6. GitHub
+  // 6. GitHub — use system credentials (gh CLI or GH_TOKEN), no stored token
   let repoUrl = null;
-  if (config.github?.connected) {
-    try {
-      const user = await getGitHubUser(config);
-      const repoName = `synced-${slug}`;
-      logger.step(`Creating private GitHub repo: ${user.login}/${repoName}`);
-      const repo = await createRepo(config, repoName, `${clientName} WordPress site`);
-      repoUrl = repo.ssh_url;
-      logger.success(`Repo created: ${repo.html_url}`);
-    } catch (err) {
-      logger.warn(`GitHub repo creation failed: ${err.message}`);
-    }
+  try {
+    const user = await getGitHubUser();
+    const repoName = `synced-${slug}`;
+    logger.step(`Creating private GitHub repo: ${user.login}/${repoName}`);
+    const repo = await createRepo(repoName, `${clientName} WordPress site`);
+    repoUrl = repo.ssh_url;
+    logger.success(`Repo created: ${repo.html_url}`);
+  } catch (err) {
+    logger.warn(`GitHub: ${err.message}`);
+    logger.info('Skipping repo creation — run `gh auth login` to enable.');
   }
 
   // 7. SYNCED.md

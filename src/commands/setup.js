@@ -1,6 +1,6 @@
 import { writeConfig, readConfig } from '../lib/config.js';
 import { logger } from '../utils/logger.js';
-import { confirm, input, password } from '../utils/prompt.js';
+import { confirm, input } from '../utils/prompt.js';
 import { execa } from 'execa';
 import { existsSync, chmodSync, mkdirSync } from 'fs';
 import { join } from 'path';
@@ -45,8 +45,7 @@ async function isWpCliInstalled() {
 }
 
 /**
- * Install WP-CLI. Uses PHP via system (WP-CLI still needs a PHP binary
- * for its phar runner even though wp-now uses WASM). Installs to ~/.local/bin.
+ * Install WP-CLI automatically. Installs to ~/.local/bin — no sudo needed.
  */
 async function installWpCli() {
   const platform = os.platform();
@@ -87,18 +86,13 @@ async function installWpCli() {
 /**
  * synced setup
  *
- * First-run Hub setup. Guides the user through:
- *  1. Prerequisite checks (Git, Node 22+)
- *  2. Sites directory location
- *  3. GitHub PAT (optional)
- *  4. AI provider preference
- *  5. WP-CLI install (optional — for DB export/import in phase 2)
+ * Prerequisites (dev must have these before running):
+ *   - Git
+ *   - Node.js 22+
+ *   - GitHub account (used when creating repos via `synced new`)
  *
- * Note: PHP and MySQL are NOT prerequisites for the dev.
- *  - PHP: wp-now runs WordPress via WASM — no PHP install needed.
- *  - MySQL: managed by Synced per site — the dev never touches it.
- *
- * Saves result to ~/.synced/config.json
+ * Setup only asks one thing: where to store sites.
+ * Everything else is handled automatically by Synced.
  */
 export async function setupCommand(options = {}) {
   const existing = readConfig();
@@ -112,9 +106,9 @@ export async function setupCommand(options = {}) {
     }
   }
 
-  logger.title('Synced Hub — First Run Setup');
+  logger.title('Synced Hub — Setup');
   logger.divider();
-  logger.info('Prerequisites: Git and Node.js 22+. Everything else is handled by Synced.');
+  logger.info('Prerequisites: Git, Node.js 22+, and a GitHub account.');
   logger.blank();
 
   // 1. Prerequisite checks
@@ -140,27 +134,13 @@ export async function setupCommand(options = {}) {
 
   logger.blank();
 
-  // 2. Sites directory
+  // 2. Sites directory — only question we ask
   const sitesPath = await input(
     'Where would you like to store your sites?',
     '~/Synced-Sites'
   );
 
-  // 3. GitHub PAT
-  logger.info('Get your token at: https://github.com/settings/tokens (scope: repo)');
-  const token = await password('GitHub Personal Access Token (repo scope):');
-  let github = { connected: false, token: null };
-  if (token && token.trim()) {
-    github = { connected: true, token: token.trim() };
-    logger.success('GitHub token saved.');
-  } else {
-    logger.warn('No token provided — repos will not be created automatically. Re-run setup to add it later.');
-  }
-
-  // 4. AI provider — not asked, all AI files created per site automatically
-  const ai = 'any';
-
-  // 5. WP-CLI — install automatically if not found
+  // 3. WP-CLI — install automatically if not found
   logger.blank();
   logger.step('Checking WP-CLI...');
   const wpInstalled = await isWpCliInstalled();
@@ -172,14 +152,13 @@ export async function setupCommand(options = {}) {
   }
 
   // Save config
-  const config = { sitesPath, github, ai };
+  const config = { sitesPath };
   writeConfig(config);
 
   logger.blank();
-  logger.success('Setup complete! Config saved to ~/.synced/config.json');
+  logger.success('Setup complete!');
   logger.divider();
   logger.info(`Sites path:  ${sitesPath}`);
-  logger.info(`GitHub:      ${github.connected ? 'connected' : 'not connected'}`);
   logger.info(`WP-CLI:      ${wpInstalled ? 'installed' : 'installed (check above)'}`);
   logger.blank();
   logger.info('Run `synced new "Client Name"` to create your first site.');

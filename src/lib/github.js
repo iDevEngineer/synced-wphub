@@ -3,20 +3,47 @@ import { execa } from 'execa';
 import { logger } from '../utils/logger.js';
 
 /**
- * Create an Octokit instance from config
+ * Get a GitHub token from the environment or gh CLI.
+ * Devs are expected to have GitHub configured — we don't store tokens ourselves.
  */
-function getOctokit(config) {
-  if (!config.github?.connected || !config.github?.token) {
-    throw new Error('GitHub is not connected. Run `synced setup` to configure it.');
+async function getToken() {
+  // 1. Try GH_TOKEN / GITHUB_TOKEN env var
+  if (process.env.GH_TOKEN) return process.env.GH_TOKEN;
+  if (process.env.GITHUB_TOKEN) return process.env.GITHUB_TOKEN;
+
+  // 2. Try gh CLI
+  try {
+    const { stdout } = await execa('gh', ['auth', 'token']);
+    const token = stdout.trim();
+    if (token) return token;
+  } catch {
+    // gh not installed or not authenticated
   }
-  return new Octokit({ auth: config.github.token });
+
+  return null;
+}
+
+/**
+ * Create an Octokit instance using system credentials.
+ */
+async function getOctokit() {
+  const token = await getToken();
+  if (!token) {
+    throw new Error(
+      'GitHub authentication not found.\n' +
+      'Either:\n' +
+      '  • Run: gh auth login\n' +
+      '  • Or set GH_TOKEN environment variable'
+    );
+  }
+  return new Octokit({ auth: token });
 }
 
 /**
  * Get the authenticated GitHub user
  */
-export async function getGitHubUser(config) {
-  const octokit = getOctokit(config);
+export async function getGitHubUser() {
+  const octokit = await getOctokit();
   const { data } = await octokit.users.getAuthenticated();
   return data;
 }
@@ -24,8 +51,8 @@ export async function getGitHubUser(config) {
 /**
  * Create a private GitHub repository
  */
-export async function createRepo(config, repoName, description = '') {
-  const octokit = getOctokit(config);
+export async function createRepo(repoName, description = '') {
+  const octokit = await getOctokit();
 
   try {
     const { data } = await octokit.repos.createForAuthenticatedUser({
@@ -52,11 +79,10 @@ export async function initAndPush(sitePath, repoUrl) {
   try {
     logger.step('Initialising git repository...');
     await execa('git', ['init'], opts);
-
     await execa('git', ['add', '.'], opts);
     await execa('git', ['commit', '-m', 'feat: initial commit — synced new'], opts);
 
-    logger.step('Adding GitHub remote and pushing...');
+    logger.step('Pushing to GitHub...');
     await execa('git', ['remote', 'add', 'origin', repoUrl], opts);
     await execa('git', ['branch', '-M', 'main'], opts);
     await execa('git', ['push', '-u', 'origin', 'main'], opts);
