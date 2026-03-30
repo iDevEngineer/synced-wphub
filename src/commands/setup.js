@@ -165,20 +165,15 @@ export async function setupCommand(options = {}) {
     { name: 'skip', message: 'Skip for now' },
   ]);
 
-  // 5. WP-CLI — optional, needed for phase 2 DB sync
+  // 5. WP-CLI — install automatically if not found
   logger.blank();
   logger.step('Checking WP-CLI...');
   const wpInstalled = await isWpCliInstalled();
   if (wpInstalled) {
     logger.success('WP-CLI is installed.');
   } else {
-    logger.warn('WP-CLI not found. Not required now — needed for database sync in phase 2.');
-    const installWp = await confirm('Install WP-CLI now? (recommended)', true);
-    if (installWp) {
-      await installWpCli();
-    } else {
-      logger.info('Skipping — install later with: https://wp-cli.org/#installing');
-    }
+    logger.info('WP-CLI not found — installing...');
+    await installWpCli();
   }
 
   // Save config
@@ -191,7 +186,7 @@ export async function setupCommand(options = {}) {
   logger.info(`Sites path:  ${sitesPath}`);
   logger.info(`GitHub:      ${github.connected ? 'connected' : 'not connected'}`);
   logger.info(`AI:          ${ai}`);
-  logger.info(`WP-CLI:      ${wpInstalled ? 'installed' : 'not installed'}`);
+  logger.info(`WP-CLI:      ${wpInstalled ? 'installed' : 'installed (check above)'}`);
   logger.blank();
   logger.info('Run `synced new "Client Name"` to create your first site.');
 }
