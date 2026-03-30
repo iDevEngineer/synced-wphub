@@ -1,6 +1,6 @@
 import { writeConfig, readConfig } from '../lib/config.js';
 import { logger } from '../utils/logger.js';
-import { confirm, input } from '../utils/prompt.js';
+import { confirm } from '../utils/prompt.js';
 import { execa } from 'execa';
 import { existsSync, chmodSync, mkdirSync } from 'fs';
 import { join } from 'path';
@@ -134,11 +134,8 @@ export async function setupCommand(options = {}) {
 
   logger.blank();
 
-  // 2. Sites directory — only question we ask
-  const sitesPath = await input(
-    'Where would you like to store your sites?',
-    '~/Synced-Sites'
-  );
+  // 2. Sites directory — default, no prompt
+  const sitesPath = '~/Synced-Sites';
 
   // 3. WP-CLI — install automatically if not found
   logger.blank();
