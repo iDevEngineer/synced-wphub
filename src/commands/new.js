@@ -1,5 +1,6 @@
 import { mkdirSync, existsSync, writeFileSync } from 'fs';
 import { join } from 'path';
+import { homedir } from 'os';
 import { readConfig, getSitePath } from '../lib/config.js';
 import { cloneStarterTheme, renameThemePlaceholders, applyBrandColours } from '../lib/boilerplate.js';
 import { createRepo, initAndPush, getGitHubUser } from '../lib/github.js';
@@ -183,7 +184,18 @@ export async function newCommand(clientName) {
     }
   }
 
-  // 10. Start WordPress — pass blueprint to activate theme, reset to clear stale cache
+  // 10. Clear wp-now cache for this site and start fresh
+  const wpNowCacheDir = join(homedir(), '.wp-now');
+  if (existsSync(wpNowCacheDir)) {
+    logger.step('Clearing wp-now cache...');
+    try {
+      await execa('rm', ['-rf', wpNowCacheDir]);
+      logger.success('Cache cleared.');
+    } catch {
+      logger.warn('Could not clear wp-now cache — continuing anyway.');
+    }
+  }
+
   const blueprintPath = join(sitePath, 'blueprint.json');
   let localUrl = 'http://localhost:8881';
   try {
