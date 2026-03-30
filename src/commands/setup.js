@@ -131,8 +131,29 @@ export async function setupCommand(options = {}) {
     logger.success(`PHP: ${phpInstalled}`);
   } else {
     logger.warn('PHP not found. WP-CLI requires PHP.');
-    logger.info('Install with Homebrew: brew install php');
-    logger.info('After installing PHP, re-run `synced setup` to install WP-CLI.');
+    const platform = os.platform();
+    if (platform === 'darwin') {
+      const hasBrew = await execa('command', ['-v', 'brew']).then(() => true).catch(() => false);
+      if (hasBrew) {
+        logger.info('Install PHP: brew install php');
+      } else {
+        logger.info('Install Homebrew first: https://brew.sh');
+        logger.info('Then install PHP: brew install php');
+      }
+    } else if (platform === 'linux') {
+      const hasApt = await execa('command', ['-v', 'apt']).then(() => true).catch(() => false);
+      const hasDnf = await execa('command', ['-v', 'dnf']).then(() => true).catch(() => false);
+      if (hasApt) {
+        logger.info('Install PHP: sudo apt install php php-cli');
+      } else if (hasDnf) {
+        logger.info('Install PHP: sudo dnf install php php-cli');
+      } else {
+        logger.info('Install PHP for your distro: https://www.php.net/manual/en/install.unix.php');
+      }
+    } else {
+      logger.info('Install PHP: https://www.php.net/downloads');
+    }
+    logger.info('After installing PHP, re-run `synced setup` to complete WP-CLI installation.');
   }
 
   // 5. WP-CLI check and install
