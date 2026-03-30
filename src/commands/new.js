@@ -56,9 +56,26 @@ export async function newCommand(clientName) {
   logger.step(`Creating site directory: ${sitePath}`);
   mkdirSync(sitePath, { recursive: true });
 
-  // 3. Create wp-content structure
-  // wp-now detects wp-content mode from plugins + themes dirs being present.
-  // It downloads WordPress core automatically — no WP-CLI needed.
+  // 3. Download full WordPress core into site directory
+  // This gives the dev wp-admin, wp-includes, wp-config.php — same as WordPress Studio.
+  logger.step('Downloading WordPress...');
+  try {
+    await execa('curl', [
+      '-fsSL',
+      '-o', '/tmp/wordpress.tar.gz',
+      'https://wordpress.org/latest.tar.gz',
+    ]);
+    logger.step('Extracting WordPress...');
+    await execa('tar', ['-xzf', '/tmp/wordpress.tar.gz', '-C', '/tmp']);
+    // tar extracts to /tmp/wordpress/ — move contents to sitePath
+    await execa('rsync', ['-a', '/tmp/wordpress/', sitePath + '/']);
+    await execa('rm', ['-rf', '/tmp/wordpress', '/tmp/wordpress.tar.gz']);
+    logger.success('WordPress downloaded.');
+  } catch (err) {
+    logger.error(`Failed to download WordPress: ${err.message}`);
+    process.exit(1);
+  }
+
   const wpContentPath = join(sitePath, 'wp-content');
   const themesPath = join(wpContentPath, 'themes');
   const pluginsPath = join(wpContentPath, 'plugins');
@@ -66,17 +83,12 @@ export async function newCommand(clientName) {
   mkdirSync(themesPath, { recursive: true });
   mkdirSync(pluginsPath, { recursive: true });
 
-  // Write a Blueprint file to activate our theme on first startup
+  // Write a Blueprint to activate our theme — used by wp-now on first start
   const blueprint = {
-    steps: [
-      {
-        step: 'activateTheme',
-        themeFolderName: slug,
-      },
-    ],
+    steps: [{ step: 'activateTheme', themeFolderName: slug }],
   };
   writeFileSync(
-    join(wpContentPath, 'blueprint.json'),
+    join(sitePath, 'blueprint.json'),
     JSON.stringify(blueprint, null, 2),
     'utf8'
   );
@@ -168,15 +180,14 @@ export async function newCommand(clientName) {
     }
   }
 
-  // 10. Start WordPress — point wp-now at wp-content dir (wp-content mode)
-  const wpContentPath2 = join(sitePath, 'wp-content');
-  const blueprintPath = join(wpContentPath2, 'blueprint.json');
+  // 10. Start WordPress — point wp-now at site root (wordpress mode — full WP install)
+  const blueprintPath = join(sitePath, 'blueprint.json');
   let localUrl = 'http://localhost:8881';
   try {
-    localUrl = await startWordPress(wpContentPath2, 8881, blueprintPath);
+    localUrl = await startWordPress(sitePath, 8881, blueprintPath);
   } catch (err) {
     logger.warn(`WordPress start failed: ${err.message}`);
-    logger.info('Start manually: npx @wp-now/wp-now start --path=' + wpContentPath2);
+    logger.info('Start manually: npx @wp-now/wp-now start --path=' + sitePath);
   }
 
   // 11. Open VS Code
