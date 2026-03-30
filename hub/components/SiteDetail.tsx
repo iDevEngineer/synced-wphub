@@ -2,7 +2,7 @@
 
 import useSWR from 'swr';
 import { fetchSite, startSite, stopSite } from '@/lib/api';
-import { ExternalLink, Eye, EyeOff } from 'lucide-react';
+import { ExternalLink, Eye, EyeOff, Folder, Code2, Paintbrush, AlignJustify } from 'lucide-react';
 import { useState } from 'react';
 import DeployPanel from './DeployPanel';
 import SyncPanel from './SyncPanel';
@@ -240,81 +240,98 @@ interface OverviewTabProps {
   wpAdminUrl: string | null;
 }
 
-function OverviewTab({ site, wpAdminUrl }: OverviewTabProps) {
+function OverviewTab({ site, isRunning, wpAdminUrl }: OverviewTabProps) {
+  const customizeUrl = site.url ? `${site.url}/wp-admin/customize.php` : null;
+  const menusUrl = site.url ? `${site.url}/wp-admin/nav-menus.php` : null;
+
+  function openInFinder() {
+    if (site.path) {
+      fetch(`/api/sites/${site.slug}/open-finder`, { method: 'POST' });
+    }
+  }
+
+  function openInEditor() {
+    if (site.path) {
+      fetch(`/api/sites/${site.slug}/open-editor`, { method: 'POST' });
+    }
+  }
+
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: '32px' }}>
-      {/* Info cards — 2 column grid */}
-      <div
-        style={{
-          display: 'grid',
-          gridTemplateColumns: '1fr 1fr',
-          gap: '12px',
-        }}
-      >
-        <InfoCard label="WordPress" value="Local" mono={false} />
-        <InfoCard label="PHP" value="Local" mono={false} />
-        {site.url ? (
-          <InfoCard label="URL" value={site.url} isLink />
-        ) : (
-          <InfoCard label="URL" value="— (site not running)" />
-        )}
-        <InfoCard label="Path" value={site.path ?? '—'} mono copyable />
+    <div style={{ display: 'flex', gap: '40px' }}>
+      {/* Left: Theme thumbnail placeholder */}
+      <div style={{ flexShrink: 0, width: '160px' }}>
+        <div
+          style={{
+            width: '160px',
+            height: '200px',
+            backgroundColor: '#242830',
+            border: '1px solid #3d4147',
+            borderRadius: '6px',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+          }}
+        >
+          <span style={{ fontSize: '12px', color: '#6b7280' }}>Theme preview</span>
+        </div>
+        <p style={{ fontSize: '12px', color: '#9ca3af', marginTop: '8px', textAlign: 'center' }}>
+          Synced WP Theme
+        </p>
       </div>
 
-      {/* WP Admin section */}
-      {wpAdminUrl && (
+      {/* Right: Quick actions */}
+      <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '28px' }}>
+
+        {/* Customize section */}
         <section>
-          <h2
-            style={{
-              fontSize: '13px',
-              fontWeight: 600,
-              color: '#9ca3af',
-              textTransform: 'uppercase',
-              letterSpacing: '0.05em',
-              marginBottom: '12px',
-            }}
-          >
-            WP Admin
+          <h2 style={{ fontSize: '13px', fontWeight: 600, color: '#9ca3af', marginBottom: '10px' }}>
+            Customize
           </h2>
-          <div
-            style={{
-              backgroundColor: '#242830',
-              border: '1px solid #3d4147',
-              borderRadius: '8px',
-              padding: '16px 20px',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'space-between',
-              gap: '16px',
-            }}
-          >
-            <span style={{ fontSize: '13px', color: '#9ca3af', fontFamily: 'monospace' }}>
-              {wpAdminUrl}
-            </span>
-            <a
-              href={wpAdminUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: '6px',
-                backgroundColor: '#e05a2b',
-                color: '#fff',
-                borderRadius: '6px',
-                padding: '7px 14px',
-                fontSize: '13px',
-                fontWeight: 500,
-                textDecoration: 'none',
-                flexShrink: 0,
-              }}
-            >
-              <ExternalLink size={12} />
-              Open WP Admin
-            </a>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
+            <QuickActionButton
+              icon={<Paintbrush size={14} />}
+              label="Customizer"
+              href={isRunning && customizeUrl ? customizeUrl : undefined}
+              disabled={!isRunning}
+            />
+            <QuickActionButton
+              icon={<AlignJustify size={14} />}
+              label="Menus"
+              href={isRunning && menusUrl ? menusUrl : undefined}
+              disabled={!isRunning}
+            />
           </div>
         </section>
-      )}
+
+        {/* Open in... section */}
+        <section>
+          <h2 style={{ fontSize: '13px', fontWeight: 600, color: '#9ca3af', marginBottom: '10px' }}>
+            Open in...
+          </h2>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
+            <QuickActionButton
+              icon={<Folder size={14} />}
+              label="Finder"
+              onClick={openInFinder}
+              disabled={!site.path}
+            />
+            <QuickActionButton
+              icon={<Code2 size={14} />}
+              label="VS Code"
+              onClick={openInEditor}
+              disabled={!site.path}
+            />
+            {wpAdminUrl && (
+              <QuickActionButton
+                icon={<ExternalLink size={14} />}
+                label="WP Admin"
+                href={wpAdminUrl}
+                disabled={!isRunning}
+              />
+            )}
+          </div>
+        </section>
+      </div>
     </div>
   );
 }
@@ -619,6 +636,54 @@ const smallButtonStyle: React.CSSProperties = {
   fontWeight: 500,
   cursor: 'pointer',
 };
+
+// ─── Quick Action Button ─────────────────────────────────────────────────────
+
+function QuickActionButton({
+  icon,
+  label,
+  href,
+  onClick,
+  disabled,
+}: {
+  icon: React.ReactNode;
+  label: string;
+  href?: string;
+  onClick?: () => void;
+  disabled?: boolean;
+}) {
+  const style: React.CSSProperties = {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '8px',
+    padding: '10px 14px',
+    backgroundColor: '#242830',
+    border: '1px solid #3d4147',
+    borderRadius: '6px',
+    fontSize: '13px',
+    color: disabled ? '#6b7280' : '#f9fafb',
+    cursor: disabled ? 'not-allowed' : 'pointer',
+    textDecoration: 'none',
+    fontWeight: 500,
+    transition: 'background-color 0.15s',
+  };
+
+  if (href && !disabled) {
+    return (
+      <a href={href} target="_blank" rel="noopener noreferrer" style={style}>
+        {icon}{label}
+      </a>
+    );
+  }
+
+  return (
+    <button onClick={disabled ? undefined : onClick} disabled={disabled} style={{ ...style, width: '100%', border: '1px solid #3d4147' }}>
+      {icon}{label}
+    </button>
+  );
+}
+
+// ─── Settings Row ─────────────────────────────────────────────────────────────
 
 function SettingsRow({
   label,
