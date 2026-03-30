@@ -1,4 +1,5 @@
 // synced hub — starts the Next.js Hub UI and opens the browser
+// Auto-installs hub dependencies if needed before starting.
 import { execa } from 'execa';
 import open from 'open';
 import path from 'path';
@@ -13,54 +14,54 @@ export async function hubCommand() {
   const port = 5757;
   const url = `http://localhost:${port}`;
 
-  // Check hub directory exists
   if (!existsSync(hubDir)) {
-    console.error(`Hub directory not found: ${hubDir}`);
-    console.error('Run `npm install` in the hub directory to set it up.');
+    console.error('Hub directory not found. Try re-installing Synced.');
     process.exit(1);
   }
 
-  // Check node_modules exists (hub has been installed)
+  // Auto-install hub dependencies if node_modules missing
   if (!existsSync(path.join(hubDir, 'node_modules'))) {
-    console.error('Hub dependencies not installed. Run `npm install` in the hub/ directory first.');
-    process.exit(1);
+    console.log('Installing Hub dependencies...');
+    try {
+      await execa('npm', ['install', '--prefer-offline'], {
+        cwd: hubDir,
+        stdio: 'inherit',
+      });
+    } catch {
+      // Try without --prefer-offline
+      await execa('npm', ['install'], {
+        cwd: hubDir,
+        stdio: 'inherit',
+      });
+    }
+    console.log('');
   }
 
-  // Check if a built .next dir exists; if not, try dev mode instead
-  const isBuilt = existsSync(path.join(hubDir, '.next', 'standalone')) ||
-    existsSync(path.join(hubDir, '.next', 'server'));
-
-  console.log(`Synced running at ${url}`);
-
-  const command = isBuilt ? 'next' : 'next';
+  // Check if .next build exists — use dev mode if not
+  const isBuilt = existsSync(path.join(hubDir, '.next', 'server'));
   const args = isBuilt
     ? ['start', '-p', String(port)]
     : ['dev', '-p', String(port)];
 
-  // Open browser after a short delay
+  console.log(`Starting Synced... ${url}`);
+
+  // Open browser after 2s (enough for Next.js to be ready)
   setTimeout(() => {
     open(url).catch(() => {});
-  }, 1500);
+  }, 2000);
 
-  // Start the Next.js server (foreground — keeps the process alive)
+  // Try next binary directly, fall back to npx
   try {
-    await execa(command, args, {
+    await execa('next', args, {
       cwd: hubDir,
       stdio: 'inherit',
-      env: {
-        ...process.env,
-        PORT: String(port),
-      },
+      env: { ...process.env, PORT: String(port) },
     });
-  } catch (err) {
-    // Try via npx if next isn't in PATH
+  } catch {
     await execa('npx', ['next', ...args], {
       cwd: hubDir,
       stdio: 'inherit',
-      env: {
-        ...process.env,
-        PORT: String(port),
-      },
+      env: { ...process.env, PORT: String(port) },
     });
   }
 }
