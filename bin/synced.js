@@ -11,6 +11,8 @@ import { newCommand } from '../src/commands/new.js';
 import { themeCommand } from '../src/commands/theme.js';
 import { uninstallCommand } from '../src/commands/uninstall.js';
 import { deployCommand } from '../src/commands/deploy.js';
+import { pushCommand } from '../src/commands/push.js';
+import { pullCommand } from '../src/commands/pull.js';
 import { startCommand } from '../src/commands/start.js';
 import { stopCommand } from '../src/commands/stop.js';
 import { listCommand } from '../src/commands/list.js';
@@ -111,6 +113,32 @@ program
   });
 
 program
+  .command('push <clientName>')
+  .description('Push local database and files to staging')
+  .option('--no-media', 'Skip media sync')
+  .action(async (clientName, options) => {
+    try {
+      await pushCommand(clientName, options);
+    } catch (err) {
+      console.error('Push failed:', err.message);
+      process.exit(1);
+    }
+  });
+
+program
+  .command('pull <clientName>')
+  .description('Pull staging database and files to local')
+  .option('--no-media', 'Skip media sync')
+  .action(async (clientName, options) => {
+    try {
+      await pullCommand(clientName, options);
+    } catch (err) {
+      console.error('Pull failed:', err.message);
+      process.exit(1);
+    }
+  });
+
+program
   .command('list')
   .description('List all local sites and their status')
   .action(async () => {
@@ -132,6 +160,10 @@ Examples:
   $ synced list
   $ synced theme "Acme Corp"
   $ synced deploy "Acme Corp"
+  $ synced push "Acme Corp"
+  $ synced push "Acme Corp" --no-media
+  $ synced pull "Acme Corp"
+  $ synced pull "Acme Corp" --no-media
 `);
 
 program.parseAsync(process.argv).catch((err) => {
