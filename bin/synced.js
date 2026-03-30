@@ -9,6 +9,7 @@ import { readFileSync } from 'fs';
 import { setupCommand } from '../src/commands/setup.js';
 import { newCommand } from '../src/commands/new.js';
 import { themeCommand } from '../src/commands/theme.js';
+import { uninstallCommand } from '../src/commands/uninstall.js';
 
 // Read version from package.json
 const __dirname = dirname(fileURLToPath(import.meta.url));
@@ -52,6 +53,18 @@ program
       await themeCommand(clientName);
     } catch (err) {
       console.error('Theme update failed:', err.message);
+      process.exit(1);
+    }
+  });
+
+program
+  .command('uninstall')
+  .description('Completely remove Synced WP — CLI, config, cache, and optionally sites')
+  .action(async () => {
+    try {
+      await uninstallCommand();
+    } catch (err) {
+      console.error('Uninstall failed:', err.message);
       process.exit(1);
     }
   });
