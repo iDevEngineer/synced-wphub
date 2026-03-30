@@ -60,9 +60,10 @@ program
 program
   .command('uninstall')
   .description('Completely remove Synced WP — CLI, config, cache, and optionally sites')
-  .action(async () => {
+  .option('--sites', 'Also remove ~/Synced-Sites and all local sites')
+  .action(async (options) => {
     try {
-      await uninstallCommand();
+      await uninstallCommand(options);
     } catch (err) {
       console.error('Uninstall failed:', err.message);
       process.exit(1);

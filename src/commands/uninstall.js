@@ -3,7 +3,7 @@ import { join } from 'path';
 import { homedir } from 'os';
 import { logger } from '../utils/logger.js';
 
-export async function uninstallCommand() {
+export async function uninstallCommand(options = {}) {
   logger.title('Synced WP — Uninstall');
   logger.divider();
   logger.blank();
@@ -32,7 +32,7 @@ export async function uninstallCommand() {
   }
 
   // 3. Remove sites if --sites flag passed
-  const removeSites = process.argv.includes('--sites');
+  const removeSites = options.sites === true;
   if (removeSites) {
     logger.step('Removing sites...');
     if (existsSync(sitesDir)) {
