@@ -195,25 +195,23 @@ export async function newCommand(clientName) {
     }
   }
 
-  // 10. Clear wp-now cache for this site and start fresh
-  const wpNowCacheDir = join(homedir(), '.wp-now');
-  if (existsSync(wpNowCacheDir)) {
-    logger.step('Clearing wp-now cache...');
-    try {
-      await execa('rm', ['-rf', wpNowCacheDir]);
-      logger.success('Cache cleared.');
-    } catch {
-      logger.warn('Could not clear wp-now cache — continuing anyway.');
-    }
+  // 10. Start WordPress — point at wp-content dir (wp-content mode)
+  // wp-now manages WordPress core itself, no wp-config.php needed
+  const blueprintPath = join(wpContentPath, 'blueprint.json');
+
+  // Move blueprint into wp-content where wp-now can find it
+  try {
+    await execa('mv', [join(sitePath, 'blueprint.json'), blueprintPath]);
+  } catch {
+    // already there or doesn't exist — non-fatal
   }
 
-  const blueprintPath = join(sitePath, 'blueprint.json');
   let localUrl = 'http://localhost:8881';
   try {
-    localUrl = await startWordPress(sitePath, 8881, blueprintPath, true);
+    localUrl = await startWordPress(wpContentPath, 8881, blueprintPath, true);
   } catch (err) {
     logger.warn(`WordPress start failed: ${err.message}`);
-    logger.info('Start manually: npx @wp-now/wp-now start --path=' + sitePath);
+    logger.info('Start manually: npx @wp-now/wp-now start --path=' + wpContentPath);
   }
 
   // 11. Open VS Code
