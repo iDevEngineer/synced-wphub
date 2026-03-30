@@ -47,17 +47,24 @@ export async function fetchSite(slug: string): Promise<SiteDetail> {
   return data;
 }
 
-export async function startSite(slug: string): Promise<{ url: string }> {
+export async function startSite(slug: string): Promise<{ success: boolean; url?: string; error?: string }> {
   const res = await fetch(`/api/sites/${slug}/start`, { method: 'POST' });
   const data = await res.json();
-  if (!res.ok) throw new Error(data.error ?? 'Failed to start site');
-  return data;
+  if (!res.ok) {
+    const msg = (data as { error?: string }).error ?? 'Failed to start site';
+    return { success: false, error: msg };
+  }
+  return { success: true, ...(data as { url?: string }) };
 }
 
-export async function stopSite(slug: string): Promise<void> {
+export async function stopSite(slug: string): Promise<{ success: boolean; error?: string }> {
   const res = await fetch(`/api/sites/${slug}/stop`, { method: 'POST' });
   const data = await res.json();
-  if (!res.ok) throw new Error(data.error ?? 'Failed to stop site');
+  if (!res.ok) {
+    const msg = (data as { error?: string }).error ?? 'Failed to stop site';
+    return { success: false, error: msg };
+  }
+  return { success: true };
 }
 
 export async function deploySite(slug: string): Promise<{ message: string }> {

@@ -2,9 +2,10 @@
 
 import useSWR from 'swr';
 import { fetchSites, type Site } from '@/lib/api';
-import { Terminal } from 'lucide-react';
+import { Plus } from 'lucide-react';
 import clsx from 'clsx';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
+import CreateSiteModal from './CreateSiteModal';
 
 interface Props {
   selectedSlug: string | null;
@@ -12,7 +13,8 @@ interface Props {
 }
 
 export default function SiteList({ selectedSlug, onSelect }: Props) {
-  const { data, error, isLoading } = useSWR('sites', fetchSites, {
+  const [showCreateModal, setShowCreateModal] = useState(false);
+  const { data, error, isLoading, mutate } = useSWR('sites', fetchSites, {
     refreshInterval: 3000,
     revalidateOnFocus: true,
   });
@@ -48,13 +50,11 @@ export default function SiteList({ selectedSlug, onSelect }: Props) {
     <div className="flex flex-col h-full">
       <div className="px-4 py-3 border-b" style={{ borderColor: '#3d4147' }}>
         <button
-          onClick={() => {
-            alert('Run in terminal: synced new "Site Name"');
-          }}
+          onClick={() => setShowCreateModal(true)}
           className="flex items-center gap-2 w-full text-sm px-3 py-2 rounded font-medium transition-colors"
           style={{ backgroundColor: '#e05a2b', color: '#fff' }}
         >
-          <Terminal size={14} />
+          <Plus size={14} />
           Create site
         </button>
       </div>
@@ -81,6 +81,13 @@ export default function SiteList({ selectedSlug, onSelect }: Props) {
           ))
         )}
       </div>
+
+      {showCreateModal && (
+        <CreateSiteModal
+          onClose={() => setShowCreateModal(false)}
+          onCreated={() => mutate()}
+        />
+      )}
     </div>
   );
 }

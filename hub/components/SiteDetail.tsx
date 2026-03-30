@@ -10,9 +10,10 @@ import SyncPanel from './SyncPanel';
 
 interface Props {
   slug: string;
+  onStatusChange?: () => void;
 }
 
-export default function SiteDetail({ slug }: Props) {
+export default function SiteDetail({ slug, onStatusChange }: Props) {
   const { data: site, error, isLoading, mutate } = useSWR(
     slug ? `site-${slug}` : null,
     () => fetchSite(slug),
@@ -26,8 +27,13 @@ export default function SiteDetail({ slug }: Props) {
     setActionLoading(true);
     setActionError(null);
     try {
-      await startSite(slug);
-      await mutate();
+      const result = await startSite(slug);
+      if (!result.success) {
+        setActionError(result.error ?? 'Failed to start site.');
+      } else {
+        await mutate();
+        onStatusChange?.();
+      }
     } catch (err) {
       setActionError(err instanceof Error ? err.message : 'Failed to start site.');
     } finally {
@@ -39,8 +45,13 @@ export default function SiteDetail({ slug }: Props) {
     setActionLoading(true);
     setActionError(null);
     try {
-      await stopSite(slug);
-      await mutate();
+      const result = await stopSite(slug);
+      if (!result.success) {
+        setActionError(result.error ?? 'Failed to stop site.');
+      } else {
+        await mutate();
+        onStatusChange?.();
+      }
     } catch (err) {
       setActionError(err instanceof Error ? err.message : 'Failed to stop site.');
     } finally {

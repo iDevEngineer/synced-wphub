@@ -1,14 +1,19 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useCallback } from 'react';
 import SiteList from '@/components/SiteList';
 import SiteDetail from '@/components/SiteDetail';
 import { Settings } from 'lucide-react';
 import Link from 'next/link';
-import type { Site } from '@/lib/api';
+import { mutate } from 'swr';
 
 export default function HomePage() {
   const [selectedSlug, setSelectedSlug] = useState<string | null>(null);
+
+  // Revalidates the global sites list when a site start/stop action completes
+  const handleStatusChange = useCallback(() => {
+    mutate('sites');
+  }, []);
 
   return (
     <div className="flex h-screen" style={{ backgroundColor: '#1a1d20' }}>
@@ -46,7 +51,7 @@ export default function HomePage() {
       {/* Main panel */}
       <main className="flex-1 overflow-y-auto" style={{ backgroundColor: '#1a1d20' }}>
         {selectedSlug ? (
-          <SiteDetail slug={selectedSlug} />
+          <SiteDetail slug={selectedSlug} onStatusChange={handleStatusChange} />
         ) : (
           <EmptyState />
         )}
