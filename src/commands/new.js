@@ -71,6 +71,9 @@ export async function newCommand(clientName) {
     await execa('tar', ['-xzf', '/tmp/wordpress.tar.gz', '-C', '/tmp']);
     // tar extracts to /tmp/wordpress/ — move contents to sitePath
     await execa('rsync', ['-a', '/tmp/wordpress/', sitePath + '/']);
+    // Remove wp-config-sample.php — wp-now must create its own SQLite wp-config.php
+    await execa('rm', ['-f', join(sitePath, 'wp-config-sample.php')]);
+    await execa('rm', ['-f', join(sitePath, 'wp-config.php')]);
     await execa('rm', ['-rf', '/tmp/wordpress', '/tmp/wordpress.tar.gz']);
     logger.success('WordPress downloaded.');
   } catch (err) {
@@ -195,23 +198,13 @@ export async function newCommand(clientName) {
     }
   }
 
-  // 10. Copy wp-config-sample.php → wp-config.php so wp-now can use it
-  const wpConfigSample = join(sitePath, 'wp-config-sample.php');
-  const wpConfig = join(sitePath, 'wp-config.php');
-  if (existsSync(wpConfigSample) && !existsSync(wpConfig)) {
-    try {
-      await execa('cp', [wpConfigSample, wpConfig]);
-      logger.step('Created wp-config.php');
-    } catch (err) {
-      logger.warn(`Could not create wp-config.php: ${err.message}`);
-    }
-  }
-
-  // 11. Start WordPress (wordpress mode — full WP install with wp-admin etc.)
+  // 10. Start WordPress
+  // Do NOT copy wp-config-sample.php — wp-now creates its own SQLite wp-config.php
+  // If a MySQL-placeholder wp-config.php exists, wp-now tries MySQL and fails
   const blueprintPath = join(sitePath, 'blueprint.json');
   let localUrl = 'http://localhost:8881';
   try {
-    localUrl = await startWordPress(sitePath, 8881, blueprintPath, true);
+    localUrl = await startWordPress(sitePath, 8881, blueprintPath, false);
   } catch (err) {
     logger.warn(`WordPress start failed: ${err.message}`);
     logger.info('Start manually: npx @wp-now/wp-now start --path=' + sitePath);
