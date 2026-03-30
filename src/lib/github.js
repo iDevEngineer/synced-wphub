@@ -7,11 +7,7 @@ import { logger } from '../utils/logger.js';
  * Devs are expected to have GitHub configured — we don't store tokens ourselves.
  */
 async function getToken() {
-  // 1. Try GH_TOKEN / GITHUB_TOKEN env var
-  if (process.env.GH_TOKEN) return process.env.GH_TOKEN;
-  if (process.env.GITHUB_TOKEN) return process.env.GITHUB_TOKEN;
-
-  // 2. Try gh CLI
+  // 1. Prefer gh CLI — picks the active valid token from keyring
   try {
     const { stdout } = await execa('gh', ['auth', 'token']);
     const token = stdout.trim();
@@ -19,6 +15,10 @@ async function getToken() {
   } catch {
     // gh not installed or not authenticated
   }
+
+  // 2. Fall back to env vars
+  if (process.env.GH_TOKEN) return process.env.GH_TOKEN;
+  if (process.env.GITHUB_TOKEN) return process.env.GITHUB_TOKEN;
 
   return null;
 }
