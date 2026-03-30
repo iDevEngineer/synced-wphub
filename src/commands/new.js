@@ -1,5 +1,6 @@
 import { mkdirSync, existsSync, writeFileSync } from 'fs';
 import { join } from 'path';
+import { homedir } from 'os';
 import { readConfig, getSitePath } from '../lib/config.js';
 import { cloneStarterTheme, renameThemePlaceholders, applyBrandColours } from '../lib/boilerplate.js';
 import { createRepo, initAndPush, getGitHubUser } from '../lib/github.js';
@@ -8,6 +9,15 @@ import { logger } from '../utils/logger.js';
 import { confirm, input } from '../utils/prompt.js';
 import { setupCommand } from './setup.js';
 import { execa } from 'execa';
+
+/**
+ * Resolve the wp binary — checks ~/.local/bin first, then falls back to PATH.
+ */
+async function resolveWpBin() {
+  const localBin = join(homedir(), '.local', 'bin', 'wp');
+  if (existsSync(localBin)) return localBin;
+  return 'wp'; // fall back to PATH
+}
 
 const DEFAULT_COLOURS = {
   primary: '#ffffff',
@@ -194,8 +204,13 @@ export async function newCommand(clientName) {
   // 11. Activate our theme via WP-CLI
   logger.step(`Activating theme: ${slug}...`);
   try {
-    await execa('wp', ['theme', 'activate', slug, `--path=${sitePath}`], {
-      env: { ...process.env, WP_CLI_ALLOW_ROOT: '1' },
+    // Resolve wp binary — may be in ~/.local/bin which isn't always in subprocess PATH
+    const wpBin = await resolveWpBin();
+    await execa(wpBin, ['theme', 'activate', slug, `--path=${sitePath}`], {
+      env: {
+        ...process.env,
+        PATH: `${process.env.HOME}/.local/bin:/usr/local/bin:/opt/homebrew/bin:${process.env.PATH}`,
+      },
     });
     logger.success(`Theme "${slug}" activated.`);
   } catch (err) {
