@@ -10,7 +10,7 @@ const __dirname = path.dirname(__filename);
 
 export async function hubCommand() {
   const hubDir = path.join(__dirname, '../../hub');
-  const port = 3000;
+  const port = 5757;
   const url = `http://localhost:${port}`;
 
   // Check hub directory exists
