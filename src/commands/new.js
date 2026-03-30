@@ -207,18 +207,6 @@ export async function newCommand(clientName) {
     logger.info('Start manually: npx @wp-now/wp-now start --path=' + sitePath);
   }
 
-  // 11. Open VS Code
-  try {
-    logger.step('Opening VS Code...');
-    const vscode = execa('code', [sitePath], { detached: true, stdio: 'ignore' });
-    vscode.unref();
-    vscode.catch(() => {
-      logger.warn('VS Code not found — open manually: code ' + sitePath);
-    });
-  } catch {
-    logger.warn('VS Code not found — open manually: code ' + sitePath);
-  }
-
   // Success summary
   logger.blank();
   logger.divider();
