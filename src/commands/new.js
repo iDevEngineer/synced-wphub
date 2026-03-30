@@ -219,6 +219,7 @@ export async function newCommand(clientName) {
     logger.info(`  GitHub:     ${repoUrl}`);
   }
   logger.blank();
+  logger.info(`Activate your theme: ${localUrl}/wp-admin → Appearance → Themes → ${clientName}`);
   logger.info('Run `synced theme "' + clientName + '"` to update brand colours.');
   logger.divider();
 }
