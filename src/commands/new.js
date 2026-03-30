@@ -183,10 +183,11 @@ export async function newCommand(clientName) {
     }
   }
 
-  // 10. Start WordPress
+  // 10. Start WordPress — pass blueprint to activate theme, reset to clear stale cache
+  const blueprintPath = join(sitePath, 'blueprint.json');
   let localUrl = 'http://localhost:8881';
   try {
-    localUrl = await startWordPress(sitePath, 8881);
+    localUrl = await startWordPress(sitePath, 8881, blueprintPath, true);
   } catch (err) {
     logger.warn(`WordPress start failed: ${err.message}`);
     logger.info('Start manually: npx @wp-now/wp-now start --path=' + sitePath);

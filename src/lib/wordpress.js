@@ -28,13 +28,16 @@ function getWpNowBin() {
  *
  * Returns the local URL.
  */
-export async function startWordPress(sitePath, port = 8881, blueprintPath = null) {
+export async function startWordPress(sitePath, port = 8881, blueprintPath = null, reset = false) {
   logger.step('Starting WordPress...');
 
   const wpNowBin = getWpNowBin();
   const args = ['start', `--path=${sitePath}`, `--port=${port}`, '--skip-browser'];
   if (blueprintPath && existsSync(blueprintPath)) {
     args.push(`--blueprint=${blueprintPath}`);
+  }
+  if (reset) {
+    args.push('--reset');
   }
 
   try {
