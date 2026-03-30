@@ -4,7 +4,7 @@ import { confirm, input, password, select } from '../utils/prompt.js';
 import { execa } from 'execa';
 import { existsSync, chmodSync, mkdirSync } from 'fs';
 import { join } from 'path';
-import os from 'os';
+import os, { homedir } from 'os';
 
 /**
  * Check if WP-CLI is installed and in PATH.
@@ -40,10 +40,15 @@ async function installWpCli() {
 
     chmodSync('/tmp/wp-cli.phar', '755');
 
-    logger.step('Installing WP-CLI to /usr/local/bin/wp...');
-    await execa('mv', ['/tmp/wp-cli.phar', '/usr/local/bin/wp']);
+    // Install to ~/.local/bin to avoid needing sudo
+    const installDir = join(homedir(), '.local', 'bin');
+    mkdirSync(installDir, { recursive: true });
+    const installPath = join(installDir, 'wp');
+    logger.step(`Installing WP-CLI to ${installPath}...`);
+    await execa('mv', ['/tmp/wp-cli.phar', installPath]);
 
-    logger.success('WP-CLI installed.');
+    logger.success('WP-CLI installed to ~/.local/bin/wp');
+    logger.info('Ensure ~/.local/bin is in your PATH. Add to ~/.zshrc or ~/.bashrc: export PATH="$HOME/.local/bin:$PATH"');
     return true;
   } catch (err) {
     logger.warn(`WP-CLI auto-install failed: ${err.message}`);
