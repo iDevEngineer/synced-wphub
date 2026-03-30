@@ -1,0 +1,119 @@
+'use client';
+
+import useSWR from 'swr';
+import { fetchSites, type Site } from '@/lib/api';
+import { Terminal } from 'lucide-react';
+import clsx from 'clsx';
+import { useEffect } from 'react';
+
+interface Props {
+  selectedSlug: string | null;
+  onSelect: (slug: string) => void;
+}
+
+export default function SiteList({ selectedSlug, onSelect }: Props) {
+  const { data, error, isLoading } = useSWR('sites', fetchSites, {
+    refreshInterval: 3000,
+    revalidateOnFocus: true,
+  });
+
+  // Auto-select first running site, then first site
+  useEffect(() => {
+    if (!data || selectedSlug) return;
+    const running = data.find((s) => s.status === 'running');
+    const first = data[0];
+    if (running) onSelect(running.slug);
+    else if (first) onSelect(first.slug);
+  }, [data, selectedSlug, onSelect]);
+
+  if (isLoading) {
+    return (
+      <div className="px-4 py-6 text-sm" style={{ color: '#9ca3af' }}>
+        Loading sites...
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="px-4 py-6 text-sm" style={{ color: '#9ca3af' }}>
+        Failed to load sites.
+      </div>
+    );
+  }
+
+  const sites = data ?? [];
+
+  return (
+    <div className="flex flex-col h-full">
+      <div className="px-4 py-3 border-b" style={{ borderColor: '#3d4147' }}>
+        <button
+          onClick={() => {
+            alert('Run in terminal: synced new "Site Name"');
+          }}
+          className="flex items-center gap-2 w-full text-sm px-3 py-2 rounded font-medium transition-colors"
+          style={{ backgroundColor: '#e05a2b', color: '#fff' }}
+        >
+          <Terminal size={14} />
+          Create site
+        </button>
+      </div>
+
+      <div className="flex-1 overflow-y-auto py-2">
+        {sites.length === 0 ? (
+          <div className="px-4 py-6 text-center">
+            <p className="text-sm font-medium mb-1" style={{ color: '#f9fafb' }}>
+              No sites yet.
+            </p>
+            <p className="text-xs leading-relaxed" style={{ color: '#9ca3af' }}>
+              Create your first site to get started. Synced handles the scaffolding, GitHub setup, and
+              deployment config automatically.
+            </p>
+          </div>
+        ) : (
+          sites.map((site) => (
+            <SiteRow
+              key={site.slug}
+              site={site}
+              isSelected={selectedSlug === site.slug}
+              onClick={() => onSelect(site.slug)}
+            />
+          ))
+        )}
+      </div>
+    </div>
+  );
+}
+
+function SiteRow({ site, isSelected, onClick }: { site: Site; isSelected: boolean; onClick: () => void }) {
+  const isRunning = site.status === 'running';
+
+  return (
+    <button
+      onClick={onClick}
+      className={clsx(
+        'w-full text-left px-4 py-3 transition-colors',
+        isSelected ? 'bg-opacity-20' : 'hover:bg-opacity-10'
+      )}
+      style={{
+        backgroundColor: isSelected ? 'rgba(224, 90, 43, 0.12)' : undefined,
+        borderLeft: isSelected ? '2px solid #e05a2b' : '2px solid transparent',
+      }}
+    >
+      <div className="flex items-center gap-2">
+        <span
+          className="flex-shrink-0 w-2 h-2 rounded-full"
+          style={{ backgroundColor: isRunning ? '#e05a2b' : '#6b7280' }}
+        />
+        <span className="text-sm font-medium truncate" style={{ color: '#f9fafb' }}>
+          {site.name}
+        </span>
+      </div>
+      {isRunning && site.url && (
+        <p className="text-xs mt-1 ml-4 truncate" style={{ color: '#9ca3af' }}>
+          {site.url}
+        </p>
+      )}
+    </button>
+  );
+}

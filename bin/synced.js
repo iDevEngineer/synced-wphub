@@ -16,6 +16,7 @@ import { pullCommand } from '../src/commands/pull.js';
 import { startCommand } from '../src/commands/start.js';
 import { stopCommand } from '../src/commands/stop.js';
 import { listCommand } from '../src/commands/list.js';
+import { hubCommand } from '../src/commands/hub.js';
 
 // Read version from package.json
 const __dirname = dirname(fileURLToPath(import.meta.url));
@@ -150,6 +151,18 @@ program
     }
   });
 
+program
+  .command('hub')
+  .description('Open the Synced dashboard')
+  .action(async () => {
+    try {
+      await hubCommand();
+    } catch (err) {
+      console.error('Hub failed:', err.message);
+      process.exit(1);
+    }
+  });
+
 // Show help if no command provided
 program.addHelpText('after', `
 Examples:
@@ -158,6 +171,7 @@ Examples:
   $ synced start "Acme Corp"
   $ synced stop "Acme Corp"
   $ synced list
+  $ synced hub
   $ synced theme "Acme Corp"
   $ synced deploy "Acme Corp"
   $ synced push "Acme Corp"
