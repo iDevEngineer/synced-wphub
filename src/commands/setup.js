@@ -20,6 +20,44 @@ async function isPhpInstalled() {
 }
 
 /**
+ * Check if MySQL is installed and running. Returns version string or null.
+ */
+async function isMysqlInstalled() {
+  try {
+    const { stdout } = await execa('mysql', ['--version']);
+    const match = stdout.match(/(\d+\.\d+\.\d+)/);
+    return match ? match[1] : 'installed';
+  } catch {
+    return null;
+  }
+}
+
+async function isMysqlRunning() {
+  try {
+    await execa('mysqladmin', ['ping', '--silent']);
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+function getMysqlInstallInstructions() {
+  const platform = os.platform();
+  if (platform === 'darwin') {
+    return [
+      'Install MySQL: brew install mysql',
+      'Then start it: brew services start mysql',
+    ];
+  } else if (platform === 'linux') {
+    return [
+      'Install MySQL: sudo apt install mysql-server  (or: sudo dnf install mysql-server)',
+      'Then start it: sudo systemctl start mysql',
+    ];
+  }
+  return ['Install MySQL: https://dev.mysql.com/downloads/'];
+}
+
+/**
  * Check if WP-CLI is installed and in PATH.
  */
 async function isWpCliInstalled() {
@@ -95,7 +133,7 @@ export async function setupCommand(options = {}) {
 
   logger.title('Synced Hub — First Run Setup');
   logger.divider();
-  logger.info('Prerequisites: Git, Node.js 22+, PHP, and a GitHub account with a Personal Access Token.');
+  logger.info('Prerequisites: Git, Node.js 22+, PHP, MySQL, and a GitHub account with a Personal Access Token.');
   logger.info('Get your token at: https://github.com/settings/tokens (scope: repo)');
   logger.blank();
 
@@ -123,7 +161,30 @@ export async function setupCommand(options = {}) {
     { name: 'skip', message: 'Skip for now' },
   ]);
 
-  // 4. PHP check
+  // 4. MySQL check
+  logger.blank();
+  logger.step('Checking MySQL...');
+  const mysqlInstalled = await isMysqlInstalled();
+  if (mysqlInstalled) {
+    const running = await isMysqlRunning();
+    if (running) {
+      logger.success(`MySQL ${mysqlInstalled} — running`);
+    } else {
+      logger.warn(`MySQL ${mysqlInstalled} installed but not running.`);
+      const platform = os.platform();
+      if (platform === 'darwin') {
+        logger.info('Start it: brew services start mysql');
+      } else {
+        logger.info('Start it: sudo systemctl start mysql');
+      }
+    }
+  } else {
+    logger.warn('MySQL not found. Required for local WordPress sites.');
+    getMysqlInstallInstructions().forEach(line => logger.info(line));
+    logger.info('After installing MySQL, re-run `synced setup`.');
+  }
+
+  // 5. PHP check
   logger.blank();
   logger.step('Checking PHP...');
   const phpInstalled = await isPhpInstalled();
@@ -190,7 +251,8 @@ export async function setupCommand(options = {}) {
   logger.info(`Sites path:  ${sitesPath}`);
   logger.info(`GitHub:      ${github.connected ? 'connected' : 'not connected'}`);
   logger.info(`AI:          ${ai}`);
-  logger.info(`PHP:         ${phpInstalled ? phpInstalled : 'not found — run: brew install php'}`);
+  logger.info(`MySQL:       ${mysqlInstalled ? mysqlInstalled : 'not found — see above'}`);
+  logger.info(`PHP:         ${phpInstalled ? phpInstalled : 'not found — see above'}`);
   logger.info(`WP-CLI:      ${wpInstalled ? 'installed' : 'not installed — re-run setup after installing PHP'}`);
   logger.blank();
   logger.info('Run `synced new "Client Name"` to create your first site.');
