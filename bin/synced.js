@@ -10,6 +10,7 @@ import { setupCommand } from '../src/commands/setup.js';
 import { newCommand } from '../src/commands/new.js';
 import { themeCommand } from '../src/commands/theme.js';
 import { uninstallCommand } from '../src/commands/uninstall.js';
+import { deployCommand } from '../src/commands/deploy.js';
 
 // Read version from package.json
 const __dirname = dirname(fileURLToPath(import.meta.url));
@@ -58,6 +59,18 @@ program
   });
 
 program
+  .command('deploy <clientName>')
+  .description('Deploy theme to staging')
+  .action(async (clientName) => {
+    try {
+      await deployCommand(clientName);
+    } catch (err) {
+      console.error('Deploy failed:', err.message);
+      process.exit(1);
+    }
+  });
+
+program
   .command('uninstall')
   .description('Completely remove Synced WP — CLI, config, cache, and optionally sites')
   .option('--sites', 'Also remove ~/Synced-Sites and all local sites')
@@ -76,6 +89,7 @@ Examples:
   $ synced setup
   $ synced new "Acme Corp"
   $ synced theme "Acme Corp"
+  $ synced deploy "Acme Corp"
 `);
 
 program.parseAsync(process.argv).catch((err) => {
