@@ -28,7 +28,27 @@ function getWpNowBin() {
  *
  * Returns the local URL.
  */
+/**
+ * Kill any running wp-now processes on the given port.
+ */
+export async function killWpNow(port = 8881) {
+  try {
+    // Find and kill any process on the port
+    const { stdout } = await execa('lsof', ['-ti', `tcp:${port}`]).catch(() => ({ stdout: '' }));
+    const pids = stdout.trim().split('\n').filter(Boolean);
+    for (const pid of pids) {
+      await execa('kill', ['-9', pid]).catch(() => {});
+    }
+    if (pids.length) logger.step(`Stopped existing process on port ${port}.`);
+  } catch {
+    // non-fatal
+  }
+}
+
 export async function startWordPress(sitePath, port = 8881, blueprintPath = null, reset = false) {
+  // Kill any existing wp-now on this port first
+  await killWpNow(port);
+
   logger.step('Starting WordPress...');
 
   const wpNowBin = getWpNowBin();
