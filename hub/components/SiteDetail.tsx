@@ -7,15 +7,17 @@ import { useState } from 'react';
 import DeployPanel from './DeployPanel';
 import SyncPanel from './SyncPanel';
 import SiteSettingsPanel from './SiteSettingsPanel';
+import DeleteSiteModal from './DeleteSiteModal';
 
 type Tab = 'overview' | 'sync' | 'deploy' | 'settings';
 
 interface Props {
   slug: string;
   onStatusChange?: () => void;
+  onDeleted?: () => void;
 }
 
-export default function SiteDetail({ slug, onStatusChange }: Props) {
+export default function SiteDetail({ slug, onStatusChange, onDeleted }: Props) {
   const { data: site, error, isLoading, mutate } = useSWR(
     slug ? `site-${slug}` : null,
     () => fetchSite(slug),
@@ -25,6 +27,7 @@ export default function SiteDetail({ slug, onStatusChange }: Props) {
   const [activeTab, setActiveTab] = useState<Tab>('overview');
   const [actionLoading, setActionLoading] = useState(false);
   const [actionError, setActionError] = useState<string | null>(null);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
 
   async function handleStart() {
     setActionLoading(true);
@@ -207,9 +210,34 @@ export default function SiteDetail({ slug, onStatusChange }: Props) {
         )}
 
         {activeTab === 'settings' && (
-          <SiteSettingsPanel slug={slug} staging={site.staging} onSaved={() => mutate()} />
+          <>
+            <SiteSettingsPanel slug={slug} staging={site.staging} onSaved={() => mutate()} />
+            <div className="mt-8 pt-6 border-t" style={{ borderColor: '#3d4147' }}>
+              <button
+                onClick={() => setShowDeleteModal(true)}
+                className="text-sm"
+                style={{ color: '#9ca3af', background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}
+                onMouseEnter={(e) => { (e.currentTarget as HTMLButtonElement).style.color = '#ef4444'; }}
+                onMouseLeave={(e) => { (e.currentTarget as HTMLButtonElement).style.color = '#9ca3af'; }}
+              >
+                Delete site
+              </button>
+            </div>
+          </>
         )}
       </div>
+
+      {showDeleteModal && (
+        <DeleteSiteModal
+          slug={slug}
+          siteName={site.name}
+          onDeleted={() => {
+            setShowDeleteModal(false);
+            onDeleted?.();
+          }}
+          onClose={() => setShowDeleteModal(false)}
+        />
+      )}
     </div>
   );
 }

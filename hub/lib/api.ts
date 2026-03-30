@@ -105,6 +105,20 @@ export async function fetchConfig(): Promise<Config> {
   return data.config;
 }
 
+export async function deleteSite(slug: string, deleteFiles: boolean): Promise<{ success: boolean; error?: string }> {
+  const res = await fetch(`/api/sites/${slug}`, {
+    method: 'DELETE',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ deleteFiles }),
+  });
+  const data = await res.json();
+  if (!res.ok) {
+    const msg = (data as { error?: string }).error ?? 'Failed to delete site';
+    return { success: false, error: msg };
+  }
+  return { success: true };
+}
+
 export async function saveConfig(config: Config): Promise<void> {
   const res = await fetch('/api/config', {
     method: 'PUT',

@@ -1,22 +1,43 @@
 'use client';
 
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import SiteList from '@/components/SiteList';
 import SiteDetail from '@/components/SiteDetail';
+import SetupBanner from '@/components/SetupBanner';
 import { Settings } from 'lucide-react';
 import Link from 'next/link';
 import { mutate } from 'swr';
 
 export default function HomePage() {
   const [selectedSlug, setSelectedSlug] = useState<string | null>(null);
+  const [configured, setConfigured] = useState<boolean | null>(null);
+  const [bannerDismissed, setBannerDismissed] = useState(false);
 
   // Revalidates the global sites list when a site start/stop action completes
   const handleStatusChange = useCallback(() => {
     mutate('sites');
   }, []);
 
+  const handleDeleted = useCallback(() => {
+    setSelectedSlug(null);
+    mutate('sites');
+  }, []);
+
+  useEffect(() => {
+    fetch('/api/setup/status')
+      .then((r) => r.json())
+      .then((data: { configured: boolean }) => setConfigured(data.configured))
+      .catch(() => setConfigured(true)); // fail open — don't block on errors
+  }, []);
+
+  const showBanner = configured === false && !bannerDismissed;
+
   return (
-    <div className="flex h-screen" style={{ backgroundColor: '#1a1d20' }}>
+    <div className="flex flex-col h-screen" style={{ backgroundColor: '#1a1d20' }}>
+      {showBanner && (
+        <SetupBanner onDismiss={() => setBannerDismissed(true)} />
+      )}
+    <div className="flex flex-1 overflow-hidden" style={{ backgroundColor: '#1a1d20' }}>
       {/* Sidebar */}
       <aside
         className="flex flex-col flex-shrink-0 border-r"
@@ -51,11 +72,12 @@ export default function HomePage() {
       {/* Main panel */}
       <main className="flex-1 overflow-y-auto" style={{ backgroundColor: '#1a1d20' }}>
         {selectedSlug ? (
-          <SiteDetail slug={selectedSlug} onStatusChange={handleStatusChange} />
+          <SiteDetail slug={selectedSlug} onStatusChange={handleStatusChange} onDeleted={handleDeleted} />
         ) : (
           <EmptyState />
         )}
       </main>
+    </div>
     </div>
   );
 }
