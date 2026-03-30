@@ -164,12 +164,10 @@ export async function newCommand(clientName) {
   writeFileSync(join(sitePath, 'SYNCED.md'), agentsMd, 'utf8');
   logger.step('Created SYNCED.md');
 
-  // 8. CLAUDE.md (if AI = claude)
-  if (config.ai === 'claude') {
-    const claudeMd = generateClaudeMd(clientName, slug, sitePath);
-    writeFileSync(join(sitePath, 'CLAUDE.md'), claudeMd, 'utf8');
-    logger.step('Created CLAUDE.md');
-  }
+  // 8. AGENTS.md + CLAUDE.md — always create both, just reference SYNCED.md
+  writeFileSync(join(sitePath, 'AGENTS.md'), generateAgentsMd(), 'utf8');
+  writeFileSync(join(sitePath, 'CLAUDE.md'), generateClaudeMd(), 'utf8');
+  logger.step('Created AGENTS.md + CLAUDE.md');
 
   // 9. Git init and push
   if (repoUrl) {
@@ -366,27 +364,17 @@ synced theme "${clientName}"   # Update brand colours
 `;
 }
 
-function generateClaudeMd(clientName, slug, sitePath) {
-  return `# CLAUDE.md — ${clientName}
+function generateAgentsMd() {
+  return `# AI Instructions
 
-## Project
+This is a local WordPress site managed by [Synced](https://synced.agency).
+For full environment instructions, see @SYNCED.md
 
-WordPress site for **${clientName}**, scaffolded by Synced Hub.
-Read \`SYNCED.md\` for full environment details and constraints.
+> **Customising this file:** Feel free to edit, extend, or replace the contents below.
+`;
+}
 
-## Theme
-
-- **Name:** ${clientName}
-- **Folder:** \`wp-content/themes/${slug}/\`
-- **Colours:** \`wp-content/themes/${slug}/assets/src/css/variables.css\`
-- **Build:** \`npm run dev\` (watch) or \`npm run build\` (production)
-
-## Key Rules
-
-1. Never edit \`wp-includes/\` or \`wp-admin/\`
-2. Database is SQLite — no MySQL, no \`DB_*\` constants
-3. Use Tailwind v4 for all styling — classes or CSS custom properties
-4. Block theme architecture — use \`theme.json\`, templates, and patterns
-5. Always sanitize input, always escape output
+function generateClaudeMd() {
+  return `@AGENTS.md
 `;
 }

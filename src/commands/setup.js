@@ -1,6 +1,6 @@
 import { writeConfig, readConfig } from '../lib/config.js';
 import { logger } from '../utils/logger.js';
-import { confirm, input, password, select } from '../utils/prompt.js';
+import { confirm, input, password } from '../utils/prompt.js';
 import { execa } from 'execa';
 import { existsSync, chmodSync, mkdirSync } from 'fs';
 import { join } from 'path';
@@ -157,13 +157,8 @@ export async function setupCommand(options = {}) {
     logger.warn('No token provided — repos will not be created automatically. Re-run setup to add it later.');
   }
 
-  // 4. AI provider
-  const ai = await select('Which AI are you using?', [
-    { name: 'claude', message: 'Claude (Anthropic)' },
-    { name: 'chatgpt', message: 'ChatGPT / Codex (OpenAI)' },
-    { name: 'other', message: 'Other' },
-    { name: 'skip', message: 'Skip for now' },
-  ]);
+  // 4. AI provider — not asked, all AI files created per site automatically
+  const ai = 'any';
 
   // 5. WP-CLI — install automatically if not found
   logger.blank();
@@ -185,7 +180,6 @@ export async function setupCommand(options = {}) {
   logger.divider();
   logger.info(`Sites path:  ${sitesPath}`);
   logger.info(`GitHub:      ${github.connected ? 'connected' : 'not connected'}`);
-  logger.info(`AI:          ${ai}`);
   logger.info(`WP-CLI:      ${wpInstalled ? 'installed' : 'installed (check above)'}`);
   logger.blank();
   logger.info('Run `synced new "Client Name"` to create your first site.');
