@@ -66,6 +66,21 @@ export async function newCommand(clientName) {
   mkdirSync(themesPath, { recursive: true });
   mkdirSync(pluginsPath, { recursive: true });
 
+  // Write a Blueprint file to activate our theme on first startup
+  const blueprint = {
+    steps: [
+      {
+        step: 'activateTheme',
+        themeFolderName: slug,
+      },
+    ],
+  };
+  writeFileSync(
+    join(wpContentPath, 'blueprint.json'),
+    JSON.stringify(blueprint, null, 2),
+    'utf8'
+  );
+
   // 4. Clone Synced WP theme
   try {
     await cloneStarterTheme(themePath);
@@ -155,9 +170,10 @@ export async function newCommand(clientName) {
 
   // 10. Start WordPress — point wp-now at wp-content dir (wp-content mode)
   const wpContentPath2 = join(sitePath, 'wp-content');
+  const blueprintPath = join(wpContentPath2, 'blueprint.json');
   let localUrl = 'http://localhost:8881';
   try {
-    localUrl = await startWordPress(wpContentPath2);
+    localUrl = await startWordPress(wpContentPath2, 8881, blueprintPath);
   } catch (err) {
     logger.warn(`WordPress start failed: ${err.message}`);
     logger.info('Start manually: npx @wp-now/wp-now start --path=' + wpContentPath2);
