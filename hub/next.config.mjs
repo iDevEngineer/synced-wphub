@@ -1,14 +1,15 @@
-import type { NextConfig } from 'next';
 import path from 'path';
+import { fileURLToPath } from 'url';
 
-const nextConfig: NextConfig = {
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+
+/** @type {import('next').NextConfig} */
+const nextConfig = {
   experimental: {
-    // Allow importing ES module packages from the CLI lib
     esmExternals: 'loose',
   },
   webpack: (config, { isServer }) => {
     if (isServer) {
-      // Allow requiring/importing from parent CLI source (ES modules)
       config.resolve.alias = {
         ...config.resolve.alias,
         '@cli': path.resolve(__dirname, '../src'),
