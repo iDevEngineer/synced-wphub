@@ -151,7 +151,18 @@ export async function newCommand(clientName) {
     logger.warn(`Could not apply colours: ${err.message}`);
   }
 
-  // 6. GitHub — use system credentials (gh CLI or GH_TOKEN), no stored token
+  // 6. Write blueprint to activate our theme on wp-now start
+  const blueprint = {
+    steps: [{ step: 'activateTheme', themeFolderName: slug }],
+  };
+  writeFileSync(
+    join(sitePath, 'blueprint.json'),
+    JSON.stringify(blueprint, null, 2),
+    'utf8'
+  );
+  logger.step('Created blueprint.json');
+
+  // 7. GitHub — use system credentials (gh CLI or GH_TOKEN), no stored token
   let repoUrl = null;
   try {
     const user = await getGitHubUser();
@@ -165,17 +176,17 @@ export async function newCommand(clientName) {
     logger.info('Skipping repo creation — run `gh auth login` to enable.');
   }
 
-  // 7. SYNCED.md
+  // 8. SYNCED.md
   const agentsMd = generateSyncedMd(clientName, slug, sitePath, colours);
   writeFileSync(join(sitePath, 'SYNCED.md'), agentsMd, 'utf8');
   logger.step('Created SYNCED.md');
 
-  // 8. AGENTS.md + CLAUDE.md — always create both, just reference SYNCED.md
+  // 9. AGENTS.md + CLAUDE.md — always create both, just reference SYNCED.md
   writeFileSync(join(sitePath, 'AGENTS.md'), generateAgentsMd(), 'utf8');
   writeFileSync(join(sitePath, 'CLAUDE.md'), generateClaudeMd(), 'utf8');
   logger.step('Created AGENTS.md + CLAUDE.md');
 
-  // 9. Git init and push
+  // 10. Git init and push
   if (repoUrl) {
     try {
       await initAndPush(sitePath, repoUrl);
