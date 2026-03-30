@@ -33,11 +33,15 @@ async function checkNode() {
 }
 
 /**
- * Check if WP-CLI is installed and in PATH.
+ * Check if WP-CLI is installed — checks ~/.local/bin/wp first, then PATH.
  */
 async function isWpCliInstalled() {
+  const localBin = join(homedir(), '.local', 'bin', 'wp');
+  if (existsSync(localBin)) return true;
   try {
-    await execa('wp', ['--version']);
+    await execa('wp', ['--version'], {
+      env: { ...process.env, PATH: `${homedir()}/.local/bin:/usr/local/bin:/opt/homebrew/bin:${process.env.PATH}` },
+    });
     return true;
   } catch {
     return false;
