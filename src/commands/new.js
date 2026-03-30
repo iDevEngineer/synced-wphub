@@ -56,12 +56,28 @@ export async function newCommand(clientName) {
   logger.step(`Creating site directory: ${sitePath}`);
   mkdirSync(sitePath, { recursive: true });
 
+  // 3. Download WordPress core via WP-CLI
+  logger.step('Downloading WordPress...');
+  try {
+    await execa('wp', [
+      'core', 'download',
+      `--path=${sitePath}`,
+      '--skip-content',
+      '--quiet',
+    ]);
+    logger.success('WordPress core downloaded.');
+  } catch (err) {
+    logger.error(`Failed to download WordPress: ${err.message}`);
+    logger.info('Ensure WP-CLI is installed: https://wp-cli.org/#installing');
+    process.exit(1);
+  }
+
   // WordPress wp-content/themes directory
   const themesPath = join(sitePath, 'wp-content', 'themes');
   const themePath = join(themesPath, slug);
   mkdirSync(themesPath, { recursive: true });
 
-  // 3. Clone Synced WP theme
+  // 5. Clone Synced WP theme
   try {
     await cloneStarterTheme(themePath);
   } catch (err) {
@@ -69,7 +85,16 @@ export async function newCommand(clientName) {
     process.exit(1);
   }
 
-  // 4. Rename placeholders
+  // 6. Install theme dependencies
+  logger.step('Installing theme dependencies...');
+  try {
+    await execa('npm', ['install', '--silent'], { cwd: themePath });
+    logger.success('Theme dependencies installed.');
+  } catch (err) {
+    logger.warn(`Theme npm install failed: ${err.message}`);
+  }
+
+  // 7. Rename placeholders
   try {
     renameThemePlaceholders(themePath, clientName);
   } catch (err) {
@@ -194,21 +219,21 @@ function generateAgentsMd(clientName, slug, sitePath, colours) {
 ## Local Development
 
 \`\`\`bash
-# Start WordPress
-npx @wp-now/wp-now start --path=${sitePath}
+# Start WordPress (SQLite, no MySQL needed)
+synced start "${clientName}"
+# or manually:
+npx @wp-now/wp-now start --path=${sitePath} --skip-browser
 
-# Install theme dependencies
+# Watch theme for changes
 cd wp-content/themes/${slug}
-npm install
-
-# Watch for changes
 npm run dev
 \`\`\`
 
 ## Notes
 
-- This site was scaffolded by Synced Hub
-- Run \`synced theme "${clientName}"\` to update brand settings
+- Scaffolded by Synced Hub
+- Database: SQLite (managed by wp-now, no setup required)
+- Run \`synced theme "${clientName}"\` to update brand colours
 `;
 }
 
