@@ -219,65 +219,174 @@ export async function newCommand(clientName) {
 function generateAgentsMd(clientName, slug, sitePath, colours) {
   return `# AGENTS.md — ${clientName}
 
+## IMPORTANT: WordPress Environment
+
+This site runs via **wp-now** (WordPress Playground / PHP WASM). Standard \`wp\` CLI commands will NOT work — use \`npx @wp-now/wp-now\` to manage the site.
+
+### Site lifecycle
+\`\`\`bash
+# Start WordPress
+npx @wp-now/wp-now start --path=${sitePath} --skip-browser
+
+# Stop WordPress
+npx @wp-now/wp-now stop --path=${sitePath}
+\`\`\`
+
+### Theme development
+\`\`\`bash
+# Watch for changes
+cd wp-content/themes/${slug}
+npm run dev
+
+# Build for production
+npm run build
+\`\`\`
+
+---
+
 ## Stack
 
-- **CMS:** WordPress (via wp-now)
-- **Theme:** ${clientName}
-- **Theme path:** wp-content/themes/${slug}/
-- **Build tool:** Vite
-- **CSS:** Tailwind v4 with custom properties in assets/src/css/variables.css
+| | |
+|---|---|
+| CMS | WordPress (latest, via wp-now) |
+| Database | SQLite (no MySQL required) |
+| Theme | ${clientName} (${slug}) |
+| Build tool | Vite |
+| CSS | Tailwind v4 |
+| JS | ES modules |
 
 ## Brand Colours
 
-- Primary:   ${colours.primary}
-- Secondary: ${colours.secondary}
-- Accent:    ${colours.accent}
+- Primary:   \`${colours.primary}\`
+- Secondary: \`${colours.secondary}\`
+- Accent:    \`${colours.accent}\`
 
-## Local Development
+Edit: \`wp-content/themes/${slug}/assets/src/css/variables.css\`
 
-\`\`\`bash
-# Start WordPress (SQLite, no MySQL needed)
-synced start "${clientName}"
-# or manually:
-npx @wp-now/wp-now start --path=${sitePath}/wp-content --skip-browser
+---
 
-# Watch theme for changes
-cd wp-content/themes/${slug}
-npm run dev
+## File Structure
+
+\`\`\`
+${sitePath}/
+├── wp-admin/              ← WordPress admin (do not edit)
+├── wp-includes/           ← WordPress core (do not edit)
+├── wp-content/
+│   ├── themes/
+│   │   └── ${slug}/       ← YOUR THEME — work here
+│   │       ├── assets/src/css/variables.css  ← brand colours
+│   │       ├── assets/src/css/main.css       ← main styles
+│   │       ├── assets/src/js/main.js         ← main JS
+│   │       ├── style.css                     ← theme header
+│   │       ├── functions.php                 ← theme functions
+│   │       ├── index.php                     ← homepage template
+│   │       └── vite.config.js                ← build config
+│   ├── plugins/           ← install plugins here
+│   ├── mu-plugins/        ← must-use plugins (SQLite integration lives here)
+│   └── database/          ← SQLite database files (do not delete)
+├── wp-config.php          ← WordPress config (managed by wp-now)
+└── blueprint.json         ← wp-now startup config
 \`\`\`
 
-## Notes
+---
 
-- Scaffolded by Synced Hub
-- Database: SQLite (managed by wp-now, no setup required)
-- Run \`synced theme "${clientName}"\` to update brand colours
+## Database: SQLite
+
+This site uses **SQLite** — there is no MySQL server.
+
+**Rules:**
+- Never reference \`DB_NAME\`, \`DB_HOST\`, \`DB_USER\`, \`DB_PASSWORD\` — they are not defined
+- Never delete \`wp-content/db.php\` — it is the SQLite drop-in
+- Never delete \`wp-content/mu-plugins/sqlite-*\` — required for the database to work
+- Use \`$wpdb->prepare()\` for all queries with dynamic values
+- No \`FULLTEXT\` index support — use a search plugin if needed
+- No stored procedures
+
+---
+
+## WordPress Development Rules
+
+| Don't | Do instead |
+|-------|-----------|
+| Edit \`wp-includes/\` or \`wp-admin/\` | Use actions/filters/child themes |
+| Hardcode URLs or ports | Use \`get_site_url()\` or \`home_url()\` |
+| Use \`wp shell\` | Use \`wp eval\` via wp-now |
+| Build classic themes | Build block themes with \`theme.json\` |
+| Direct database queries | Use \`$wpdb\` with \`prepare()\` |
+
+**Always sanitize input and escape output:**
+- Sanitize: \`sanitize_text_field()\`, \`absint()\`, \`wp_kses_post()\`
+- Escape: \`esc_html()\`, \`esc_attr()\`, \`esc_url()\`
+
+**Use hooks, not direct edits:**
+\`\`\`php
+// Correct
+add_action('wp_enqueue_scripts', function() {
+    wp_enqueue_style('${slug}-style', get_stylesheet_uri());
+});
+
+// Wrong — never edit wp-includes/ or wp-admin/
+\`\`\`
+
+---
+
+## Common Tasks
+
+**Activate a plugin:**
+\`\`\`bash
+# Install and activate via WP-CLI (requires PHP on host machine)
+wp plugin install woocommerce --activate --path=${sitePath}
+# Or install manually: download to wp-content/plugins/ and activate via WP Admin
+\`\`\`
+
+**WP Admin:**
+- URL: http://localhost:8881/wp-admin
+- Credentials: set during first run (default: admin / password)
+
+**Debug logging:**
+Add to \`wp-config.php\`:
+\`\`\`php
+define('WP_DEBUG', true);
+define('WP_DEBUG_LOG', true);
+define('WP_DEBUG_DISPLAY', false);
+\`\`\`
+Then check: \`wp-content/debug.log\`
+
+---
+
+## Synced Hub Commands
+
+\`\`\`bash
+synced theme "${clientName}"   # Update brand colours
+\`\`\`
+
+---
+
+*Scaffolded by Synced Hub. Update brand colours any time with \`synced theme "${clientName}"\`.*
 `;
 }
 
 function generateClaudeMd(clientName, slug, sitePath) {
   return `# CLAUDE.md — ${clientName}
 
-## Project Context
+## Project
 
-This is a WordPress site for **${clientName}**, scaffolded by Synced Hub.
+WordPress site for **${clientName}**, scaffolded by Synced Hub.
+Read \`AGENTS.md\` for full environment details and constraints.
 
 ## Theme
 
 - **Name:** ${clientName}
-- **Path:** \`wp-content/themes/${slug}/\`
-- **CSS variables:** \`wp-content/themes/${slug}/assets/src/css/variables.css\`
+- **Folder:** \`wp-content/themes/${slug}/\`
+- **Colours:** \`wp-content/themes/${slug}/assets/src/css/variables.css\`
+- **Build:** \`npm run dev\` (watch) or \`npm run build\` (production)
 
-## Working with this project
+## Key Rules
 
-- Theme files are in \`wp-content/themes/${slug}/\`
-- CSS custom properties control colours — edit \`assets/src/css/variables.css\`
-- Run \`npm run dev\` in the theme directory to watch for asset changes
-- WordPress runs locally via \`npx @wp-now/wp-now start --path=${sitePath}\`
-
-## Conventions
-
-- PHP: WordPress coding standards
-- CSS: Tailwind v4, CSS custom properties
-- JS: ES modules, minimal framework use
+1. Never edit \`wp-includes/\` or \`wp-admin/\`
+2. Database is SQLite — no MySQL, no \`DB_*\` constants
+3. Use Tailwind v4 for all styling — classes or CSS custom properties
+4. Block theme architecture — use \`theme.json\`, templates, and patterns
+5. Always sanitize input, always escape output
 `;
 }
