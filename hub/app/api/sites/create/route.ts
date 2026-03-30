@@ -44,7 +44,23 @@ export async function POST(req: NextRequest) {
 
         await proc;
 
-        send({ type: 'done', message: 'Site created.' });
+        // Auto-start the site after creation
+        send({ type: 'log', message: 'Starting site...' });
+        try {
+          const startProc = execa('node', [cliPath, 'start', siteName], {
+            cwd: repoCwd,
+            all: true,
+          });
+          startProc.all?.on('data', (chunk: Buffer) => {
+            const lines = chunk.toString().split('\n').filter(Boolean);
+            lines.forEach((line) => send({ type: 'log', message: line }));
+          });
+          await startProc;
+        } catch {
+          send({ type: 'log', message: 'Site created. Start it manually from the dashboard.' });
+        }
+
+        send({ type: 'done', message: 'Site created and running.' });
       } catch (err: unknown) {
         const message = err instanceof Error ? err.message : 'Failed to create site.';
         send({ type: 'error', message });
