@@ -3,10 +3,10 @@ import { join } from 'path';
 import { homedir } from 'os';
 import { readConfig, getSitePath } from '../lib/config.js';
 import { cloneStarterTheme, renameThemePlaceholders, applyBrandColours } from '../lib/boilerplate.js';
-import { createRepo, initAndPush, getGitHubUser } from '../lib/github.js';
+
 import { startWordPress } from '../lib/wordpress.js';
 import { logger } from '../utils/logger.js';
-import { confirm, input } from '../utils/prompt.js';
+
 import { setupCommand } from './setup.js';
 import { execa } from 'execa';
 
@@ -124,27 +124,8 @@ export async function newCommand(clientName) {
     logger.warn(`Placeholder rename issue: ${err.message}`);
   }
 
-  // 5. Brand colours
-  const hasBrandColours = await confirm(
-    'Do you have brand colours? (you can set them later with `synced theme`)',
-    false
-  );
-
-  let colours = { ...DEFAULT_COLOURS };
-
-  if (hasBrandColours) {
-    const primary = await input('Primary colour (hex):', '#ffffff');
-    const secondary = await input('Secondary colour (hex):', '#1a1a1a');
-    const accent = await input('Accent colour (hex):', '#6366f1');
-    colours = {
-      primary: primary.trim() || DEFAULT_COLOURS.primary,
-      secondary: secondary.trim() || DEFAULT_COLOURS.secondary,
-      accent: accent.trim() || DEFAULT_COLOURS.accent,
-    };
-  } else {
-    logger.info('Using neutral defaults — update any time with `synced theme "Client Name"`');
-  }
-
+  // Use default colours — dev sets these later with `synced theme`
+  const colours = { ...DEFAULT_COLOURS };
   try {
     applyBrandColours(themePath, colours);
   } catch (err) {
@@ -162,18 +143,14 @@ export async function newCommand(clientName) {
   );
   logger.step('Created blueprint.json');
 
-  // 7. GitHub — use system credentials (gh CLI or GH_TOKEN), no stored token
-  let repoUrl = null;
+  // 7. Git init locally — dev creates GitHub repo when ready
   try {
-    const user = await getGitHubUser();
-    const repoName = `synced-${slug}`;
-    logger.step(`Creating private GitHub repo: ${user.login}/${repoName}`);
-    const repo = await createRepo(repoName, `${clientName} WordPress site`);
-    repoUrl = repo.ssh_url;
-    logger.success(`Repo created: ${repo.html_url}`);
+    await execa('git', ['init'], { cwd: sitePath });
+    await execa('git', ['add', '.'], { cwd: sitePath });
+    await execa('git', ['commit', '-m', 'feat: initial commit — synced new'], { cwd: sitePath });
+    logger.success('Git repository initialised.');
   } catch (err) {
-    logger.warn(`GitHub: ${err.message}`);
-    logger.info('Skipping repo creation — run `gh auth login` to enable.');
+    logger.warn(`Git init failed: ${err.message}`);
   }
 
   // 8. SYNCED.md
@@ -186,14 +163,7 @@ export async function newCommand(clientName) {
   writeFileSync(join(sitePath, 'CLAUDE.md'), generateClaudeMd(), 'utf8');
   logger.step('Created AGENTS.md + CLAUDE.md');
 
-  // 10. Git init and push
-  if (repoUrl) {
-    try {
-      await initAndPush(sitePath, repoUrl);
-    } catch (err) {
-      logger.warn(`Git push failed: ${err.message}`);
-    }
-  }
+
 
   // 10. Start WordPress
   // Do NOT copy wp-config-sample.php — wp-now creates its own SQLite wp-config.php
@@ -215,9 +185,6 @@ export async function newCommand(clientName) {
   logger.info(`  Site path:  ${sitePath}`);
   logger.info(`  Theme:      wp-content/themes/${slug}/`);
   logger.info(`  Local URL:  ${localUrl}`);
-  if (repoUrl) {
-    logger.info(`  GitHub:     ${repoUrl}`);
-  }
   logger.blank();
   logger.info(`Activate your theme: ${localUrl}/wp-admin → Appearance → Themes → ${clientName}`);
   logger.info('Run `synced theme "' + clientName + '"` to update brand colours.');
