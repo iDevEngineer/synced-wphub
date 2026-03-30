@@ -210,9 +210,13 @@ export async function newCommand(clientName) {
   // 11. Open VS Code
   try {
     logger.step('Opening VS Code...');
-    execa('code', [sitePath], { detached: true, stdio: 'ignore' }).unref();
+    const vscode = execa('code', [sitePath], { detached: true, stdio: 'ignore' });
+    vscode.unref();
+    vscode.catch(() => {
+      logger.warn('VS Code not found — open manually: code ' + sitePath);
+    });
   } catch {
-    logger.warn('VS Code not found in PATH — open manually: code ' + sitePath);
+    logger.warn('VS Code not found — open manually: code ' + sitePath);
   }
 
   // Success summary
