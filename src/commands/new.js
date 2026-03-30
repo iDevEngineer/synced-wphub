@@ -71,9 +71,6 @@ export async function newCommand(clientName) {
     await execa('tar', ['-xzf', '/tmp/wordpress.tar.gz', '-C', '/tmp']);
     // tar extracts to /tmp/wordpress/ — move contents to sitePath
     await execa('rsync', ['-a', '/tmp/wordpress/', sitePath + '/']);
-    // Remove wp-config-sample.php — wp-now must create its own SQLite wp-config.php
-    await execa('rm', ['-f', join(sitePath, 'wp-config-sample.php')]);
-    await execa('rm', ['-f', join(sitePath, 'wp-config.php')]);
     await execa('rm', ['-rf', '/tmp/wordpress', '/tmp/wordpress.tar.gz']);
     logger.success('WordPress downloaded.');
   } catch (err) {
