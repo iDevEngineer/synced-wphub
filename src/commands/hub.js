@@ -37,8 +37,8 @@ export async function hubCommand() {
     console.log('');
   }
 
-  // Check if .next build exists — use dev mode if not
-  const isBuilt = existsSync(path.join(hubDir, '.next', 'server'));
+  // Check if a production build exists — BUILD_ID only present after `next build`
+  const isBuilt = existsSync(path.join(hubDir, '.next', 'BUILD_ID'));
   const args = isBuilt
     ? ['start', '-p', String(port)]
     : ['dev', '-p', String(port)];
