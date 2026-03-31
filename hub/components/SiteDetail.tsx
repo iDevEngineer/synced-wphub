@@ -358,14 +358,6 @@ function OverviewTab({ site, isRunning, wpAdminUrl }: OverviewTabProps) {
               onClick={openInTerminal}
               disabled={!site.path}
             />
-            {wpAdminUrl && (
-              <QuickActionButton
-                icon={<ExternalLink size={14} />}
-                label="WP Admin"
-                href={wpAdminUrl}
-                disabled={!isRunning}
-              />
-            )}
           </div>
         </section>
       </div>
