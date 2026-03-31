@@ -240,12 +240,7 @@ interface OverviewTabProps {
   wpAdminUrl: string | null;
 }
 
-const EDITOR_LABELS: Record<string, string> = {
-  vscode: 'VS Code', cursor: 'Cursor', zed: 'Zed', phpstorm: 'PhpStorm', sublime: 'Sublime Text',
-};
-const TERMINAL_LABELS: Record<string, string> = {
-  terminal: 'Terminal', iterm2: 'iTerm2', warp: 'Warp', ghostty: 'Ghostty', hyper: 'Hyper',
-};
+
 
 function OverviewTab({ site, isRunning, wpAdminUrl }: OverviewTabProps) {
   const customizeUrl = site.url ? `${site.url}/wp-admin/customize.php` : null;
@@ -255,10 +250,23 @@ function OverviewTab({ site, isRunning, wpAdminUrl }: OverviewTabProps) {
   const [terminalLabel, setTerminalLabel] = useState('Terminal');
 
   useEffect(() => {
-    fetch('/api/config').then(r => r.json()).then(data => {
-      const cfg = data.config ?? data;
-      if (cfg.codeEditor) setEditorLabel(EDITOR_LABELS[cfg.codeEditor] ?? 'Editor');
-      if (cfg.terminal) setTerminalLabel(TERMINAL_LABELS[cfg.terminal] ?? 'Terminal');
+    // Fetch config and environment together — use detected app labels, not a static map
+    Promise.all([
+      fetch('/api/config').then(r => r.json()),
+      fetch('/api/environment').then(r => r.json()),
+    ]).then(([configData, envData]) => {
+      const cfg = configData.config ?? configData;
+      const editors: { id: string; label: string }[] = envData.editors ?? [];
+      const terminals: { id: string; label: string }[] = envData.terminals ?? [];
+
+      if (cfg.codeEditor) {
+        const match = editors.find(e => e.id === cfg.codeEditor);
+        setEditorLabel(match?.label ?? cfg.codeEditorApp ?? 'Editor');
+      }
+      if (cfg.terminal) {
+        const match = terminals.find(t => t.id === cfg.terminal);
+        setTerminalLabel(match?.label ?? cfg.terminalApp ?? 'Terminal');
+      }
     }).catch(() => {});
   }, []);
 

@@ -15,8 +15,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body
-        style={{ backgroundColor: '#1a1d20', color: '#f9fafb', height: '100vh', margin: 0 }}
-        className="bg-background text-text"
+        style={{ height: '100vh', margin: 0 }}
         data-theme="dark"
       >
         <ThemeApplier />
