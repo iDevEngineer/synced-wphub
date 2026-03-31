@@ -81,7 +81,7 @@ export default function EditSiteModal({ slug, siteName, onClose, onSaved }: Prop
   };
 
   const modalStyle: React.CSSProperties = {
-    width: '480px', maxHeight: '80vh', borderRadius: '8px',
+    width: '480px', maxHeight: '90vh', minHeight: '500px', borderRadius: '8px',
     display: 'flex', flexDirection: 'column', overflow: 'hidden',
   };
 
