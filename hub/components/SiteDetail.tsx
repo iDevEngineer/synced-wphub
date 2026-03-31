@@ -3,7 +3,7 @@
 import useSWR from 'swr';
 import { fetchSite, startSite, stopSite } from '@/lib/api';
 import { ExternalLink, Eye, EyeOff, Folder, Code2, Paintbrush, AlignJustify, TerminalSquare } from 'lucide-react';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import DeployPanel from './DeployPanel';
 import SyncPanel from './SyncPanel';
 import SiteSettingsPanel from './SiteSettingsPanel';
@@ -11,7 +11,7 @@ import DeleteSiteModal from './DeleteSiteModal';
 import ImportExportPanel from './ImportExportPanel';
 import CopyButton from './CopyButton';
 
-type Tab = 'overview' | 'deploy' | 'sync' | 'importexport' | 'settings';
+type Tab = 'overview' | 'deploy' | 'sync' | 'importexport' | 'logs' | 'settings';
 
 interface Props {
   slug: string;
@@ -91,6 +91,7 @@ export default function SiteDetail({ slug, onStatusChange, onDeleted }: Props) {
     { id: 'deploy', label: 'Deploy' },
     { id: 'sync', label: 'Sync' },
     { id: 'importexport', label: 'Import/Export' },
+    { id: 'logs', label: 'Logs' },
     { id: 'settings', label: 'Settings' },
   ];
 
@@ -200,6 +201,10 @@ export default function SiteDetail({ slug, onStatusChange, onDeleted }: Props) {
 
         {activeTab === 'importexport' && (
           <ImportExportPanel slug={slug} />
+        )}
+
+        {activeTab === 'logs' && (
+          <LogsTab slug={slug} isRunning={isRunning} />
         )}
 
         {activeTab === 'settings' && (
@@ -754,6 +759,109 @@ function SettingsRow({
       <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flex: 1, minWidth: 0 }}>
         {children}
       </div>
+    </div>
+  );
+}
+
+/* ── Logs Tab ─────────────────────────────────────────────── */
+
+function LogsTab({ slug, isRunning }: { slug: string; isRunning: boolean }) {
+  const [logs, setLogs] = useState('');
+  const [autoScroll, setAutoScroll] = useState(true);
+  const logsEndRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    async function poll() {
+      while (!cancelled) {
+        try {
+          const res = await fetch(`/api/sites/${slug}/logs?tail=200`);
+          const data = await res.json();
+          if (!cancelled && data.logs) {
+            setLogs(data.logs);
+          }
+        } catch { /* ignore */ }
+        await new Promise(r => setTimeout(r, 2000));
+      }
+    }
+
+    poll();
+    return () => { cancelled = true; };
+  }, [slug]);
+
+  useEffect(() => {
+    if (autoScroll && logsEndRef.current) {
+      logsEndRef.current.scrollIntoView({ behavior: 'smooth' });
+    }
+  }, [logs, autoScroll]);
+
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
+        <h2 className="text-text" style={{ fontSize: '14px', fontWeight: 600 }}>
+          Site logs
+        </h2>
+        <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+          <label className="text-muted" style={{ fontSize: '12px', display: 'flex', alignItems: 'center', gap: '4px', cursor: 'pointer' }}>
+            <input
+              type="checkbox"
+              checked={autoScroll}
+              onChange={(e) => setAutoScroll(e.target.checked)}
+              style={{ accentColor: 'var(--color-accent)' }}
+            />
+            Auto-scroll
+          </label>
+          <button
+            onClick={() => setLogs('')}
+            className="text-muted hover:text-text"
+            style={{ fontSize: '12px', background: 'none', border: 'none', cursor: 'pointer' }}
+          >
+            Clear
+          </button>
+        </div>
+      </div>
+
+      {!isRunning ? (
+        <div
+          className="bg-card border border-border text-muted"
+          style={{
+            flex: 1,
+            borderRadius: '6px',
+            padding: '24px',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            fontSize: '13px',
+          }}
+        >
+          Start the site to see logs.
+        </div>
+      ) : (
+        <div
+          className="bg-card border border-border"
+          style={{
+            flex: 1,
+            borderRadius: '6px',
+            overflow: 'auto',
+            padding: '12px',
+            fontFamily: 'ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace',
+            fontSize: '12px',
+            lineHeight: '1.6',
+            whiteSpace: 'pre-wrap',
+            wordBreak: 'break-all',
+          }}
+        >
+          {logs ? (
+            <>
+              <span className="text-text">{logs}</span>
+              <div ref={logsEndRef} />
+            </>
+          ) : (
+            <span className="text-muted">Waiting for logs...</span>
+          )}
+        </div>
+      )}
     </div>
   );
 }

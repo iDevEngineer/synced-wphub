@@ -1,11 +1,12 @@
 // Server-side wrapper for wordpress lib functions
 import 'server-only';
 import { execa } from 'execa';
-import { existsSync } from 'fs';
+import { existsSync, mkdirSync, createWriteStream } from 'fs';
 import { join } from 'path';
 import { createRequire } from 'module';
 import { fileURLToPath } from 'url';
 import { dirname } from 'path';
+import { homedir } from 'os';
 
 function getWpNowBin(): string | null {
   // Resolve from the parent CLI package
@@ -46,13 +47,22 @@ export async function startWordPress(sitePath: string, port: number, blueprintPa
     args.push(`--blueprint=${blueprintPath}`);
   }
 
+  // Set up log file for this site
+  const logsDir = join(homedir(), '.synced', 'logs');
+  mkdirSync(logsDir, { recursive: true });
+  const slug = sitePath.split('/').pop()?.toLowerCase().replace(/[^a-z0-9]+/g, '-') ?? 'unknown';
+  const logPath = join(logsDir, `${slug}.log`);
+  const logStream = createWriteStream(logPath, { flags: 'w' });
+
   let proc;
   if (wpNowBin) {
-    proc = execa('node', [wpNowBin, ...args], { detached: true, stdio: 'ignore' });
+    proc = execa('node', [wpNowBin, ...args], { detached: true, stdio: ['ignore', 'pipe', 'pipe'] });
   } else {
-    proc = execa('npx', ['@wp-now/wp-now', ...args], { detached: true, stdio: 'ignore' });
+    proc = execa('npx', ['@wp-now/wp-now', ...args], { detached: true, stdio: ['ignore', 'pipe', 'pipe'] });
   }
 
+  proc.stdout?.pipe(logStream);
+  proc.stderr?.pipe(logStream);
   proc.unref();
   await new Promise((resolve) => setTimeout(resolve, 3000));
 
