@@ -1,8 +1,7 @@
 import { NextRequest } from 'next/server';
 import { homedir } from 'os';
 import path from 'path';
-import { readFileSync, readdirSync } from 'fs';
-import { execa } from 'execa';
+import { readFileSync, readdirSync, existsSync } from 'fs';
 
 function getConfig() {
   try { return JSON.parse(readFileSync(path.join(homedir(), '.synced', 'config.json'), 'utf-8')); }
@@ -13,9 +12,10 @@ function toSlug(name: string) {
   return name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
 }
 
-function getWpCli(): string {
-  const local = path.join(homedir(), '.local', 'bin', 'wp');
-  try { readFileSync(local); return local; } catch { return 'wp'; }
+function readSiteConfig(slug: string) {
+  try {
+    return JSON.parse(readFileSync(path.join(homedir(), '.synced', 'sites', `${slug}.json`), 'utf-8'));
+  } catch { return {}; }
 }
 
 export async function GET(
@@ -28,17 +28,20 @@ export async function GET(
     const sitesPath = (config.sitesPath ?? path.join(homedir(), 'Synced-Sites')).replace(/^~/, homedir());
     const dirs = readdirSync(sitesPath);
     const match = dirs.find(d => toSlug(d) === slug) ?? slug;
-    const sitePath = path.join(sitesPath, match);
-    const wp = getWpCli();
 
-    const [wpVersion, phpVersion] = await Promise.all([
-      execa(wp, ['core', 'version', `--path=${sitePath}`, '--allow-root'])
-        .then(r => r.stdout.trim())
-        .catch(() => 'Unknown'),
-      execa(wp, ['eval', 'echo PHP_VERSION;', `--path=${sitePath}`, '--allow-root'])
-        .then(r => r.stdout.trim())
-        .catch(() => 'Unknown'),
-    ]);
+    const siteConfig = readSiteConfig(toSlug(match));
+
+    // Read WP version from wp-includes/version.php if available
+    const sitePath = path.join(sitesPath, match);
+    let wpVersion = siteConfig.wpVersion ?? 'Latest';
+    const versionFile = path.join(sitePath, 'wp-includes', 'version.php');
+    if (existsSync(versionFile)) {
+      const content = readFileSync(versionFile, 'utf-8');
+      const m = content.match(/\$wp_version\s*=\s*'([^']+)'/);
+      if (m) wpVersion = m[1];
+    }
+
+    const phpVersion = siteConfig.phpVersion ?? '8.0 (default)';
 
     return Response.json({ wpVersion, phpVersion });
   } catch {
