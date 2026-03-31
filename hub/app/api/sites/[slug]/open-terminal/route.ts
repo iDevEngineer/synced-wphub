@@ -27,8 +27,8 @@ export async function POST(_req: NextRequest, { params }: { params: { slug: stri
     const dirs = readdirSync(sitesPath);
     const match = dirs.find(d => toSlug(d) === params.slug) ?? params.slug;
     const sitePath = path.join(sitesPath, match);
-    const terminal = config.terminal ?? 'terminal';
-    const appName = TERMINAL_APPS[terminal] ?? 'Terminal';
+    // Prefer stored app name, fall back to id lookup
+    const appName = config.terminalApp ?? TERMINAL_APPS[config.terminal ?? ''] ?? 'Terminal';
     // Use AppleScript to open terminal at path
     const script = `tell application "${appName}" to activate\ntell application "System Events" to keystroke "t" using {command down}`;
     try {

@@ -7,28 +7,14 @@ import { execa } from 'execa';
 function getConfig() {
   try {
     return JSON.parse(readFileSync(path.join(homedir(), '.synced', 'config.json'), 'utf-8'));
-  } catch {
-    return {};
-  }
+  } catch { return {}; }
 }
 
 function toSlug(name: string) {
   return name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
 }
 
-// Use 'open -a AppName path' — more reliable than CLI shims on macOS
-const EDITOR_APPS: Record<string, string> = {
-  vscode:    'Visual Studio Code',
-  cursor:    'Cursor',
-  zed:       'Zed',
-  phpstorm:  'PhpStorm',
-  sublime:   'Sublime Text',
-};
-
-export async function POST(
-  _req: NextRequest,
-  { params }: { params: { slug: string } }
-) {
+export async function POST(_req: NextRequest, { params }: { params: { slug: string } }) {
   try {
     const config = getConfig();
     const sitesPath = (config.sitesPath ?? path.join(homedir(), 'Synced-Sites')).replace(/^~/, homedir());
@@ -36,14 +22,13 @@ export async function POST(
     const match = dirs.find((d: string) => toSlug(d) === params.slug) ?? params.slug;
     const sitePath = path.join(sitesPath, match);
 
-    const editorId: string = config.codeEditor ?? '';
-    const appName = EDITOR_APPS[editorId];
+    // Config stores the app name directly (e.g. "Visual Studio Code", "Cursor", "Antigravity")
+    const appName: string = config.codeEditorApp ?? config.codeEditor ?? '';
 
     try {
       if (appName) {
         await execa('open', ['-a', appName, sitePath]);
       } else {
-        // Nothing configured — open Finder as fallback
         await execa('open', [sitePath]);
       }
     } catch {
@@ -52,9 +37,6 @@ export async function POST(
 
     return Response.json({ success: true });
   } catch (err: unknown) {
-    return Response.json(
-      { error: err instanceof Error ? err.message : 'Failed to open editor.' },
-      { status: 500 }
-    );
+    return Response.json({ error: err instanceof Error ? err.message : 'Failed to open editor.' }, { status: 500 });
   }
 }

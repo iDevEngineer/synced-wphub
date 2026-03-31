@@ -76,7 +76,9 @@ export default function SettingsModal({ onClose }: Props) {
   const handleEditorChange = useCallback(async (editorId: string) => {
     setCodeEditor(editorId);
     if (!config) return;
-    const updated = { ...config, codeEditor: editorId };
+    // Also store the actual app name so open-editor can use 'open -a AppName'
+    const detected = env?.editors.find(e => e.id === editorId);
+    const updated = { ...config, codeEditor: editorId, codeEditorApp: detected?.appName ?? editorId };
     setConfig(updated);
     try {
       await fetch('/api/config', {
@@ -87,13 +89,14 @@ export default function SettingsModal({ onClose }: Props) {
     } catch {
       // non-fatal
     }
-  }, [config]);
+  }, [config, env]);
 
   // Save terminal immediately on change
   const handleTerminalChange = useCallback(async (termId: string) => {
     setTerminal(termId);
     if (!config) return;
-    const updated = { ...config, terminal: termId };
+    const detected = env?.terminals.find(t => t.id === termId);
+    const updated = { ...config, terminal: termId, terminalApp: detected?.appName ?? termId };
     setConfig(updated);
     try {
       await fetch('/api/config', {
