@@ -38,6 +38,12 @@ export async function POST(_req: Request, { params }: Params) {
     }
 
     const stagingConfig = readStagingConfig(slug);
+    if (!stagingConfig) {
+      return NextResponse.json(
+        { error: 'No staging config found for this site.' },
+        { status: 400 }
+      );
+    }
 
     // Git commit + push
     try {
@@ -58,7 +64,7 @@ export async function POST(_req: Request, { params }: Params) {
 
     // Provider deploy
     const provider = await getProvider(stagingConfig.provider as string);
-    await provider.deploy(stagingConfig as Record<string, unknown>, sitePath, slug);
+    await provider.deploy(stagingConfig as unknown as Record<string, unknown>, sitePath, slug);
 
     return NextResponse.json({ success: true, message: 'Deployed. Cache cleared.' });
   } catch (err: unknown) {

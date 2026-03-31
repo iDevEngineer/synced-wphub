@@ -56,6 +56,9 @@ export async function POST(req: Request, { params }: Params) {
     }
 
     const stagingConfig = readStagingConfig(slug);
+    if (!stagingConfig) {
+      return NextResponse.json({ error: 'No staging config found for this site.' }, { status: 400 });
+    }
     const { sshHost, sshUser, wpPath, stagingUrl } = stagingConfig;
     const wpBin = resolveWpBin();
 
