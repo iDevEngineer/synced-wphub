@@ -479,15 +479,10 @@ function AppDropdown({
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 
 function applyTheme(theme: Theme) {
-  const body = document.body;
-  body.removeAttribute('data-theme');
-  if (theme === 'dark') {
-    body.setAttribute('data-theme', 'dark');
-  } else if (theme === 'light') {
-    body.setAttribute('data-theme', 'light');
-  } else {
-    body.setAttribute('data-theme', 'system');
-  }
+  document.documentElement.setAttribute('data-theme', theme);
+  document.body.setAttribute('data-theme', theme);
+  // Notify ThemeApplier and any other listeners
+  window.dispatchEvent(new CustomEvent('synced:theme-change', { detail: theme }));
 }
 
 const sectionHeadingStyle: React.CSSProperties = {

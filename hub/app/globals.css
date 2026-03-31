@@ -12,3 +12,60 @@ body {
   margin: 0;
   padding: 0;
 }
+
+/* Dark theme (default) */
+[data-theme="dark"],
+:root {
+  --bg: #1a1d20;
+  --sidebar: #2b2f33;
+  --card: #242830;
+  --border: #3d4147;
+  --text: #f9fafb;
+  --muted: #9ca3af;
+  --accent: #e05a2b;
+  color-scheme: dark;
+}
+
+/* Light theme */
+[data-theme="light"] {
+  --bg: #f5f5f5;
+  --sidebar: #ffffff;
+  --card: #ffffff;
+  --border: #e5e7eb;
+  --text: #111827;
+  --muted: #6b7280;
+  --accent: #e05a2b;
+  color-scheme: light;
+}
+
+/* System: follow OS preference */
+@media (prefers-color-scheme: light) {
+  [data-theme="system"] {
+    --bg: #f5f5f5;
+    --sidebar: #ffffff;
+    --card: #ffffff;
+    --border: #e5e7eb;
+    --text: #111827;
+    --muted: #6b7280;
+    --accent: #e05a2b;
+    color-scheme: light;
+  }
+}
+
+@media (prefers-color-scheme: dark) {
+  [data-theme="system"] {
+    --bg: #1a1d20;
+    --sidebar: #2b2f33;
+    --card: #242830;
+    --border: #3d4147;
+    --text: #f9fafb;
+    --muted: #9ca3af;
+    --accent: #e05a2b;
+    color-scheme: dark;
+  }
+}
+
+body {
+  background-color: var(--bg);
+  color: var(--text);
+}

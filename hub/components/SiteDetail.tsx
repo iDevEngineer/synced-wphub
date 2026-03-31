@@ -2,8 +2,8 @@
 
 import useSWR from 'swr';
 import { fetchSite, startSite, stopSite } from '@/lib/api';
-import { ExternalLink, Eye, EyeOff, Folder, Code2, Paintbrush, AlignJustify } from 'lucide-react';
-import { useState } from 'react';
+import { ExternalLink, Eye, EyeOff, Folder, Code2, Paintbrush, AlignJustify, TerminalSquare } from 'lucide-react';
+import { useState, useEffect } from 'react';
 import DeployPanel from './DeployPanel';
 import SyncPanel from './SyncPanel';
 import SiteSettingsPanel from './SiteSettingsPanel';
@@ -240,20 +240,37 @@ interface OverviewTabProps {
   wpAdminUrl: string | null;
 }
 
+const EDITOR_LABELS: Record<string, string> = {
+  vscode: 'VS Code', cursor: 'Cursor', zed: 'Zed', phpstorm: 'PhpStorm', sublime: 'Sublime Text',
+};
+const TERMINAL_LABELS: Record<string, string> = {
+  terminal: 'Terminal', iterm2: 'iTerm2', warp: 'Warp', ghostty: 'Ghostty', hyper: 'Hyper',
+};
+
 function OverviewTab({ site, isRunning, wpAdminUrl }: OverviewTabProps) {
   const customizeUrl = site.url ? `${site.url}/wp-admin/customize.php` : null;
   const menusUrl = site.url ? `${site.url}/wp-admin/nav-menus.php` : null;
 
+  const [editorLabel, setEditorLabel] = useState('Editor');
+  const [terminalLabel, setTerminalLabel] = useState('Terminal');
+
+  useEffect(() => {
+    fetch('/api/config').then(r => r.json()).then(cfg => {
+      if (cfg.codeEditor) setEditorLabel(EDITOR_LABELS[cfg.codeEditor] ?? 'Editor');
+      if (cfg.terminal) setTerminalLabel(TERMINAL_LABELS[cfg.terminal] ?? 'Terminal');
+    }).catch(() => {});
+  }, []);
+
   function openInFinder() {
-    if (site.path) {
-      fetch(`/api/sites/${site.slug}/open-finder`, { method: 'POST' });
-    }
+    if (site.path) fetch(`/api/sites/${site.slug}/open-finder`, { method: 'POST' });
   }
 
   function openInEditor() {
-    if (site.path) {
-      fetch(`/api/sites/${site.slug}/open-editor`, { method: 'POST' });
-    }
+    if (site.path) fetch(`/api/sites/${site.slug}/open-editor`, { method: 'POST' });
+  }
+
+  function openInTerminal() {
+    if (site.path) fetch(`/api/sites/${site.slug}/open-terminal`, { method: 'POST' });
   }
 
   return (
@@ -330,8 +347,14 @@ function OverviewTab({ site, isRunning, wpAdminUrl }: OverviewTabProps) {
             />
             <QuickActionButton
               icon={<Code2 size={14} />}
-              label="Editor"
+              label={editorLabel}
               onClick={openInEditor}
+              disabled={!site.path}
+            />
+            <QuickActionButton
+              icon={<TerminalSquare size={14} />}
+              label={terminalLabel}
+              onClick={openInTerminal}
               disabled={!site.path}
             />
             {wpAdminUrl && (
