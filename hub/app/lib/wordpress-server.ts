@@ -1,4 +1,5 @@
 // Server-side wrapper for wordpress lib functions
+import 'server-only';
 import { execa } from 'execa';
 import { existsSync } from 'fs';
 import { join } from 'path';

@@ -8,6 +8,7 @@ const nextConfig = {
   experimental: {
     esmExternals: 'loose',
   },
+  serverExternalPackages: ['execa', '@wp-now/wp-now'],
   webpack: (config, { isServer }) => {
     if (isServer) {
       config.resolve.alias = {
