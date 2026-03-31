@@ -9,7 +9,7 @@ import { execa } from 'execa';
 import { sshRun, scpTo, rsyncTo } from '../../../../lib/ssh-server';
 
 interface Params {
-  params: { slug: string };
+  params: Promise<{ slug: string }>;
 }
 
 function resolveWpBin(): string {
@@ -29,7 +29,7 @@ function timestamp(): string {
 
 export async function POST(req: Request, { params }: Params) {
   try {
-    const { slug } = params;
+    const { slug } = await params;
     const body = await req.json().catch(() => ({}));
     const syncMedia = body.media !== false;
 

@@ -3,12 +3,12 @@ import { getSiteRunning, unregisterSite } from '../../../../lib/sites-server';
 import { killWpNow } from '../../../../lib/wordpress-server';
 
 interface Params {
-  params: { slug: string };
+  params: Promise<{ slug: string }>;
 }
 
 export async function POST(_req: Request, { params }: Params) {
   try {
-    const { slug } = params;
+    const { slug } = await params;
 
     const entry = getSiteRunning(slug);
     if (!entry) {

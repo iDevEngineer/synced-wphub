@@ -15,13 +15,13 @@ function toSlug(name: string) {
 
 export async function GET(
   _req: NextRequest,
-  { params }: { params: { slug: string } }
+  { params }: { params: Promise<{ slug: string }> }
 ) {
   try {
     const config = getConfig();
     const sitesPath = (config.sitesPath ?? path.join(homedir(), 'Synced-Sites')).replace(/^~/, homedir());
     const dirs = readdirSync(sitesPath);
-    const match = dirs.find(d => toSlug(d) === params.slug) ?? params.slug;
+    const match = dirs.find(d => toSlug(d) === slug) ?? slug;
     const sitePath = path.join(sitesPath, match);
     const themesPath = path.join(sitePath, 'wp-content', 'themes');
 

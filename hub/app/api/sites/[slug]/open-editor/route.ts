@@ -14,12 +14,12 @@ function toSlug(name: string) {
   return name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
 }
 
-export async function POST(_req: NextRequest, { params }: { params: { slug: string } }) {
+export async function POST(_req: NextRequest, { params }: { params: Promise<{ slug: string }> }) {
   try {
     const config = getConfig();
     const sitesPath = (config.sitesPath ?? path.join(homedir(), 'Synced-Sites')).replace(/^~/, homedir());
     const dirs = readdirSync(sitesPath);
-    const match = dirs.find((d: string) => toSlug(d) === params.slug) ?? params.slug;
+    const match = dirs.find((d: string) => toSlug(d) === slug) ?? slug;
     const sitePath = path.join(sitesPath, match);
 
     // Config stores the app name directly (e.g. "Visual Studio Code", "Cursor", "Antigravity")

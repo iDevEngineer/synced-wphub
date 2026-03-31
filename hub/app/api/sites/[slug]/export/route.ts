@@ -6,7 +6,7 @@ import { homedir } from 'os';
 import { execa } from 'execa';
 
 interface Params {
-  params: { slug: string };
+  params: Promise<{ slug: string }>;
 }
 
 function resolveWpBin(): string {
@@ -16,7 +16,7 @@ function resolveWpBin(): string {
 
 export async function GET(_req: Request, { params }: Params) {
   try {
-    const { slug } = params;
+    const { slug } = await params;
 
     const config = readConfig();
     if (!config) {

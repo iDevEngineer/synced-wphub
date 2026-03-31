@@ -6,7 +6,7 @@ import { homedir, tmpdir } from 'os';
 import { execa } from 'execa';
 
 interface Params {
-  params: { slug: string };
+  params: Promise<{ slug: string }>;
 }
 
 function resolveWpBin(): string {
@@ -18,7 +18,7 @@ export async function POST(req: Request, { params }: Params) {
   let tempFile: string | null = null;
 
   try {
-    const { slug } = params;
+    const { slug } = await params;
 
     const config = readConfig();
     if (!config) {

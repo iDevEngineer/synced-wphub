@@ -7,12 +7,12 @@ import { getProvider } from '../../../../lib/providers-server';
 // Note: getProvider is async — must be awaited
 
 interface Params {
-  params: { slug: string };
+  params: Promise<{ slug: string }>;
 }
 
 export async function POST(_req: Request, { params }: Params) {
   try {
-    const { slug } = params;
+    const { slug } = await params;
 
     const config = readConfig();
     if (!config) {

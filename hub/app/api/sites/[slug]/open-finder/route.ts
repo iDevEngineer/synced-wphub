@@ -16,7 +16,7 @@ function toSlug(name: string) {
 
 export async function POST(
   _req: NextRequest,
-  { params }: { params: { slug: string } }
+  { params }: { params: Promise<{ slug: string }> }
 ) {
   try {
     const config = getConfig();
@@ -24,7 +24,7 @@ export async function POST(
     // Try to find site dir by slug match
     const { readdirSync } = await import('fs');
     const dirs = readdirSync(sitesPath);
-    const match = dirs.find(d => toSlug(d) === params.slug) ?? params.slug;
+    const match = dirs.find(d => toSlug(d) === slug) ?? slug;
     const sitePath = path.join(sitesPath, match);
     await execa('open', [sitePath]);
     return Response.json({ success: true });

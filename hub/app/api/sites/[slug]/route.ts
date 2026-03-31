@@ -7,12 +7,12 @@ import { killWpNow } from '../../../lib/wordpress-server';
 import { readStagingConfig } from '../../../lib/staging-server';
 
 interface Params {
-  params: { slug: string };
+  params: Promise<{ slug: string }>;
 }
 
 export async function GET(_req: Request, { params }: Params) {
   try {
-    const { slug } = params;
+    const { slug } = await params;
     const config = readConfig();
     if (!config) {
       return NextResponse.json({ error: 'No config found' }, { status: 404 });
@@ -43,7 +43,7 @@ export async function GET(_req: Request, { params }: Params) {
 
 export async function DELETE(req: Request, { params }: Params) {
   try {
-    const { slug } = params;
+    const { slug } = await params;
 
     const body = await req.json().catch(() => ({})) as { deleteFiles?: boolean };
     const deleteFiles = body.deleteFiles === true;

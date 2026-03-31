@@ -20,12 +20,12 @@ const TERMINAL_APPS: Record<string, string> = {
   hyper: 'Hyper',
 };
 
-export async function POST(_req: NextRequest, { params }: { params: { slug: string } }) {
+export async function POST(_req: NextRequest, { params }: { params: Promise<{ slug: string }> }) {
   try {
     const config = getConfig();
     const sitesPath = (config.sitesPath ?? path.join(homedir(), 'Synced-Sites')).replace(/^~/, homedir());
     const dirs = readdirSync(sitesPath);
-    const match = dirs.find(d => toSlug(d) === params.slug) ?? params.slug;
+    const match = dirs.find(d => toSlug(d) === slug) ?? slug;
     const sitePath = path.join(sitesPath, match);
     // Prefer stored app name, fall back to id lookup
     const appName = config.terminalApp ?? TERMINAL_APPS[config.terminal ?? ''] ?? 'Terminal';
