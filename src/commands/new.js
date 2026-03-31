@@ -153,19 +153,28 @@ export async function newCommand(clientName) {
     logger.warn(`Git init failed: ${err.message}`);
   }
 
-  // 8. SYNCED.md
+  // 8. Install WordPress agent-skills
+  logger.step('Installing WordPress AI skills...');
+  try {
+    const { installWordPressSkills } = await import('../lib/skills.js');
+    await installWordPressSkills(sitePath);
+    logger.success('WordPress AI skills installed (.claude/skills/, .cursor/skills/, .codex/skills/)');
+  } catch (err) {
+    logger.warn(`Skills install failed (non-fatal): ${err.message}`);
+    logger.info('Install manually: https://github.com/WordPress/agent-skills');
+  }
+
+  // 9. SYNCED.md
   const agentsMd = generateSyncedMd(clientName, slug, sitePath, colours);
   writeFileSync(join(sitePath, 'SYNCED.md'), agentsMd, 'utf8');
   logger.step('Created SYNCED.md');
 
-  // 9. AGENTS.md + CLAUDE.md — always create both, just reference SYNCED.md
+  // 10. AGENTS.md + CLAUDE.md — always create both, just reference SYNCED.md
   writeFileSync(join(sitePath, 'AGENTS.md'), generateAgentsMd(), 'utf8');
   writeFileSync(join(sitePath, 'CLAUDE.md'), generateClaudeMd(), 'utf8');
   logger.step('Created AGENTS.md + CLAUDE.md');
 
-
-
-  // 10. Start WordPress
+  // 11. Start WordPress
   // Do NOT copy wp-config-sample.php — wp-now creates its own SQLite wp-config.php
   // If a MySQL-placeholder wp-config.php exists, wp-now tries MySQL and fails
   const blueprintPath = join(sitePath, 'blueprint.json');
@@ -336,6 +345,27 @@ Then check: \`wp-content/debug.log\`
 \`\`\`bash
 synced theme "${clientName}"   # Update brand colours
 \`\`\`
+
+---
+
+## AI Skills
+
+This site includes WordPress agent-skills for AI coding assistants.
+
+Skills are installed in:
+- \`.claude/skills/\` — Claude Code (project-level)
+- \`.cursor/skills/\` — Cursor (project-level)
+- \`.codex/skills/\` — OpenAI Codex
+
+Skills included:
+- \`wordpress-router\` — classifies repo type, routes to right workflow
+- \`wp-project-triage\` — detects project type and tooling
+- \`wp-block-development\` — Gutenberg blocks done right
+- \`wp-block-themes\` — theme.json, templates, patterns
+- \`wp-plugin-development\` — plugin architecture, security
+- \`wp-wpcli-and-ops\` — WP-CLI commands and automation
+
+Source: https://github.com/WordPress/agent-skills
 
 ---
 
