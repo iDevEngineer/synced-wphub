@@ -17,6 +17,7 @@ import { startCommand } from '../src/commands/start.js';
 import { stopCommand } from '../src/commands/stop.js';
 import { listCommand } from '../src/commands/list.js';
 import { hubCommand } from '../src/commands/hub.js';
+import { updateCommand } from '../src/commands/update.js';
 
 // Read version from package.json
 const __dirname = dirname(fileURLToPath(import.meta.url));
@@ -159,6 +160,18 @@ program
       await hubCommand();
     } catch (err) {
       console.error('Hub failed:', err.message);
+      process.exit(1);
+    }
+  });
+
+program
+  .command('update')
+  .description('Pull latest changes, reinstall dependencies, and re-link globally')
+  .action(async () => {
+    try {
+      await updateCommand();
+    } catch (err) {
+      console.error('Update failed:', err.message);
       process.exit(1);
     }
   });
