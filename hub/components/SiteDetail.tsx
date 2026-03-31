@@ -10,6 +10,7 @@ import SiteSettingsPanel from './SiteSettingsPanel';
 import DeleteSiteModal from './DeleteSiteModal';
 import ImportExportPanel from './ImportExportPanel';
 import CopyButton from './CopyButton';
+import EditSiteModal from './EditSiteModal';
 
 type Tab = 'overview' | 'deploy' | 'sync' | 'importexport' | 'logs' | 'settings';
 
@@ -30,6 +31,7 @@ export default function SiteDetail({ slug, onStatusChange, onDeleted }: Props) {
   const [actionLoading, setActionLoading] = useState(false);
   const [actionError, setActionError] = useState<string | null>(null);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [showEditModal, setShowEditModal] = useState(false);
 
   async function handleStart() {
     setActionLoading(true);
@@ -138,6 +140,12 @@ export default function SiteDetail({ slug, onStatusChange, onDeleted }: Props) {
                 WP Admin
               </a>
             )}
+            <button
+              onClick={() => setShowEditModal(true)}
+              className="px-3 py-1.5 rounded text-sm font-medium bg-border text-text"
+            >
+              Edit site
+            </button>
             {isRunning ? (
               <button
                 onClick={handleStop}
@@ -218,6 +226,15 @@ export default function SiteDetail({ slug, onStatusChange, onDeleted }: Props) {
           />
         )}
       </div>
+
+      {showEditModal && (
+        <EditSiteModal
+          slug={slug}
+          siteName={site.name}
+          onClose={() => setShowEditModal(false)}
+          onSaved={() => mutate()}
+        />
+      )}
 
       {showDeleteModal && (
         <DeleteSiteModal
@@ -449,19 +466,26 @@ function SettingsTab({ slug, site, wpAdminUrl, onSaved, onDeleteClick }: Setting
   const [showPassword, setShowPassword] = useState(false);
   const [wpVersion, setWpVersion] = useState('—');
   const [phpVersion, setPhpVersion] = useState('—');
+  const [debugStatus, setDebugStatus] = useState('Disabled');
 
   const adminPassword = 'password';
   const adminEmail = 'admin@example.com';
   const adminUsername = 'admin';
 
   useEffect(() => {
-    fetch(`/api/sites/${slug}/info`)
-      .then(r => r.json())
-      .then(data => {
-        if (data.wpVersion) setWpVersion(data.wpVersion);
-        if (data.phpVersion) setPhpVersion(data.phpVersion);
-      })
-      .catch(() => {});
+    Promise.all([
+      fetch(`/api/sites/${slug}/info`).then(r => r.json()),
+      fetch(`/api/sites/${slug}/config`).then(r => r.json()),
+    ]).then(([infoData, configData]) => {
+      if (infoData.wpVersion) setWpVersion(infoData.wpVersion);
+      if (infoData.phpVersion) setPhpVersion(infoData.phpVersion);
+
+      const parts: string[] = [];
+      if (configData.wpDebug) parts.push('WP_DEBUG');
+      if (configData.wpDebugLog) parts.push('Log');
+      if (configData.wpDebugDisplay) parts.push('Display');
+      setDebugStatus(parts.length > 0 ? parts.join(', ') : 'Disabled');
+    }).catch(() => {});
   }, [slug]);
 
   async function handleNameSave() {
@@ -558,8 +582,11 @@ function SettingsTab({ slug, site, wpAdminUrl, onSaved, onDeleteClick }: Setting
           <SettingsRow label="WordPress">
             <span style={valueStyle} className="text-text">{wpVersion}</span>
           </SettingsRow>
-          <SettingsRow label="PHP" last>
+          <SettingsRow label="PHP">
             <span style={valueStyle} className="text-text">{phpVersion}</span>
+          </SettingsRow>
+          <SettingsRow label="Debug mode" last>
+            <span style={valueStyle} className="text-text">{debugStatus}</span>
           </SettingsRow>
         </div>
       </section>
