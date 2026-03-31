@@ -371,7 +371,7 @@ Then check: \`wp-content/debug.log\`
 
 ---
 
-## Synced Hub Commands
+## Synced Commands
 
 \`\`\`bash
 synced theme "${clientName}"   # Update brand colours
@@ -394,7 +394,7 @@ Source: https://github.com/WordPress/agent-skills
 
 ---
 
-*Scaffolded by Synced Hub. Update brand colours any time with \`synced theme "${clientName}"\`.*
+*Scaffolded by Synced. Update brand colours any time with \`synced theme "${clientName}"\`.*
 `;
 }
 

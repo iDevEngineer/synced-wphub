@@ -110,7 +110,7 @@ export async function setupCommand(options = {}) {
     }
   }
 
-  logger.title('Synced Hub — Setup');
+  logger.title('Synced — Setup');
   logger.divider();
   logger.info('Prerequisites: Git, Node.js 22+, and a GitHub account.');
   logger.blank();
