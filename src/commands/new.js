@@ -388,13 +388,7 @@ Skills are installed in:
 - \`.cursor/skills/\` — Cursor (project-level)
 - \`.codex/skills/\` — OpenAI Codex
 
-Skills included:
-- \`wordpress-router\` — classifies repo type, routes to right workflow
-- \`wp-project-triage\` — detects project type and tooling
-- \`wp-block-development\` — Gutenberg blocks done right
-- \`wp-block-themes\` — theme.json, templates, patterns
-- \`wp-plugin-development\` — plugin architecture, security
-- \`wp-wpcli-and-ops\` — WP-CLI commands and automation
+All 14 official WordPress agent-skills are installed — blocks, themes, plugins, REST API, WP-CLI, performance, PHPStan, Interactivity API, and more.
 
 Source: https://github.com/WordPress/agent-skills
 
