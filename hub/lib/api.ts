@@ -29,6 +29,9 @@ export interface Config {
   wpCliPath?: string;
   github?: string;
   defaultProvider?: string;
+  theme?: 'dark' | 'light' | 'system';
+  codeEditor?: string;
+  terminal?: string;
 }
 
 // Sites

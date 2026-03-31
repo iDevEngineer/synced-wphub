@@ -330,7 +330,7 @@ function OverviewTab({ site, isRunning, wpAdminUrl }: OverviewTabProps) {
             />
             <QuickActionButton
               icon={<Code2 size={14} />}
-              label="VS Code"
+              label="Editor"
               onClick={openInEditor}
               disabled={!site.path}
             />

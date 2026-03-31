@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import './globals.css';
+import ThemeApplier from '@/components/ThemeApplier';
 
 export const metadata: Metadata = {
   title: 'Synced',
@@ -16,7 +17,9 @@ export default function RootLayout({
       <body
         style={{ backgroundColor: '#1a1d20', color: '#f9fafb', height: '100vh', margin: 0 }}
         className="bg-background text-text"
+        data-theme="dark"
       >
+        <ThemeApplier />
         {children}
       </body>
     </html>
