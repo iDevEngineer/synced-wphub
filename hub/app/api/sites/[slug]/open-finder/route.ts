@@ -6,6 +6,7 @@ import { execa } from 'execa';
 
 function getConfig() {
   try {
+    const { slug } = await params;
     return JSON.parse(readFileSync(path.join(homedir(), '.synced', 'config.json'), 'utf-8'));
   } catch { return { sitesPath: path.join(homedir(), 'Synced-Sites') }; }
 }
@@ -19,6 +20,7 @@ export async function POST(
   { params }: { params: Promise<{ slug: string }> }
 ) {
   try {
+    const { slug } = await params;
     const config = getConfig();
     const sitesPath = (config.sitesPath ?? path.join(homedir(), 'Synced-Sites')).replace(/^~/, homedir());
     // Try to find site dir by slug match
