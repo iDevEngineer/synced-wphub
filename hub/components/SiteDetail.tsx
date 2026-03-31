@@ -245,15 +245,12 @@ function OverviewTab({ site, isRunning, wpAdminUrl }: OverviewTabProps) {
 
   const [editorLabel, setEditorLabel] = useState('Editor');
   const [terminalLabel, setTerminalLabel] = useState('Terminal');
-  const [wpVersion, setWpVersion] = useState('—');
-  const [phpVersion, setPhpVersion] = useState('—');
 
   useEffect(() => {
     Promise.all([
       fetch('/api/config').then(r => r.json()),
       fetch('/api/environment').then(r => r.json()),
-      fetch(`/api/sites/${site.slug}/info`).then(r => r.json()),
-    ]).then(([configData, envData, infoData]) => {
+    ]).then(([configData, envData]) => {
       const cfg = configData.config ?? configData;
       const editors: { id: string; label: string }[] = envData.editors ?? [];
       const terminals: { id: string; label: string }[] = envData.terminals ?? [];
@@ -266,10 +263,8 @@ function OverviewTab({ site, isRunning, wpAdminUrl }: OverviewTabProps) {
         const match = terminals.find(t => t.id === cfg.terminal);
         setTerminalLabel(match?.label ?? cfg.terminalApp ?? 'Terminal');
       }
-      if (infoData.wpVersion) setWpVersion(infoData.wpVersion);
-      if (infoData.phpVersion) setPhpVersion(infoData.phpVersion);
     }).catch(() => {});
-  }, [site.slug]);
+  }, []);
 
   function openInFinder() {
     if (site.path) fetch(`/api/sites/${site.slug}/open-finder`, { method: 'POST' });
@@ -339,20 +334,6 @@ function OverviewTab({ site, isRunning, wpAdminUrl }: OverviewTabProps) {
               href={isRunning && menusUrl ? menusUrl : undefined}
               disabled={!isRunning}
             />
-          </div>
-        </section>
-
-        {/* Site info */}
-        <section>
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
-            <div className="bg-card border border-border rounded p-3">
-              <p className="text-muted" style={{ fontSize: '11px', marginBottom: '2px' }}>WordPress</p>
-              <p className="text-text font-medium" style={{ fontSize: '13px' }}>{wpVersion}</p>
-            </div>
-            <div className="bg-card border border-border rounded p-3">
-              <p className="text-muted" style={{ fontSize: '11px', marginBottom: '2px' }}>PHP</p>
-              <p className="text-text font-medium" style={{ fontSize: '13px' }}>{phpVersion}</p>
-            </div>
           </div>
         </section>
 
@@ -461,10 +442,22 @@ function SettingsTab({ slug, site, wpAdminUrl, onSaved, onDeleteClick }: Setting
   const [nameSaving, setNameSaving] = useState(false);
   const [nameError, setNameError] = useState<string | null>(null);
   const [showPassword, setShowPassword] = useState(false);
+  const [wpVersion, setWpVersion] = useState('—');
+  const [phpVersion, setPhpVersion] = useState('—');
 
   const adminPassword = 'password';
   const adminEmail = 'admin@example.com';
   const adminUsername = 'admin';
+
+  useEffect(() => {
+    fetch(`/api/sites/${slug}/info`)
+      .then(r => r.json())
+      .then(data => {
+        if (data.wpVersion) setWpVersion(data.wpVersion);
+        if (data.phpVersion) setPhpVersion(data.phpVersion);
+      })
+      .catch(() => {});
+  }, [slug]);
 
   async function handleNameSave() {
     if (!nameValue.trim() || nameValue.trim() === site.name) {
@@ -553,9 +546,15 @@ function SettingsTab({ slug, site, wpAdminUrl, onSaved, onDeleteClick }: Setting
             </SettingsRow>
           )}
 
-          <SettingsRow label="Local path" last>
+          <SettingsRow label="Local path">
             <span className="text-text" style={{ ...valueStyle, fontFamily: 'monospace', fontSize: '12px' }}>{site.path ?? '—'}</span>
             {site.path && <CopyButton value={site.path} />}
+          </SettingsRow>
+          <SettingsRow label="WordPress">
+            <span style={valueStyle} className="text-text">{wpVersion}</span>
+          </SettingsRow>
+          <SettingsRow label="PHP" last>
+            <span style={valueStyle} className="text-text">{phpVersion}</span>
           </SettingsRow>
         </div>
       </section>
