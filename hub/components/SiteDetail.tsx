@@ -12,7 +12,7 @@ import ImportExportPanel from './ImportExportPanel';
 import CopyButton from './CopyButton';
 import EditSiteModal from './EditSiteModal';
 
-type Tab = 'overview' | 'deploy' | 'sync' | 'importexport' | 'logs' | 'settings';
+type Tab = 'overview' | 'theme' | 'deploy' | 'sync' | 'importexport' | 'logs' | 'settings';
 
 interface Props {
   slug: string;
@@ -90,6 +90,7 @@ export default function SiteDetail({ slug, onStatusChange, onDeleted }: Props) {
 
   const tabs: { id: Tab; label: string }[] = [
     { id: 'overview', label: 'Overview' },
+    { id: 'theme', label: 'Theme' },
     { id: 'deploy', label: 'Deploy' },
     { id: 'sync', label: 'Sync' },
     { id: 'importexport', label: 'Import/Export' },
@@ -197,6 +198,10 @@ export default function SiteDetail({ slug, onStatusChange, onDeleted }: Props) {
             isRunning={isRunning}
             wpAdminUrl={wpAdminUrl}
           />
+        )}
+
+        {activeTab === 'theme' && (
+          <ThemeTab slug={site.slug} />
         )}
 
         {activeTab === 'deploy' && (
@@ -386,14 +391,13 @@ function OverviewTab({ site, isRunning, wpAdminUrl }: OverviewTabProps) {
           </div>
         </section>
 
-        {/* Theme colours */}
-        <ThemeColoursSection slug={site.slug} />
+
       </div>
     </div>
   );
 }
 
-function ThemeColoursSection({ slug }: { slug: string }) {
+function ThemeTab({ slug }: { slug: string }) {
   const [colours, setColours] = useState<{ primary: string; secondary: string; accent: string } | null>(null);
   const [editing, setEditing] = useState(false);
   const [primary, setPrimary] = useState('#ffffff');
@@ -431,75 +435,93 @@ function ThemeColoursSection({ slug }: { slug: string }) {
     setSaving(false);
   }
 
-  if (!colours) return null;
+  const sectionHeadingStyle: React.CSSProperties = {
+    fontSize: '13px', fontWeight: 600, marginBottom: '12px',
+  };
+
+  const cardStyle: React.CSSProperties = {
+    borderRadius: '6px', overflow: 'hidden',
+  };
 
   const swatchStyle = (colour: string): React.CSSProperties => ({
-    width: '28px', height: '28px', borderRadius: '4px',
+    width: '32px', height: '32px', borderRadius: '6px',
     backgroundColor: colour,
     border: '1px solid var(--color-border)',
     flexShrink: 0,
   });
 
-  const inputRowStyle: React.CSSProperties = {
-    display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px',
+  const colourRowStyle: React.CSSProperties = {
+    display: 'flex', alignItems: 'center', gap: '12px',
+    padding: '12px 16px',
+    borderBottom: '1px solid var(--color-border)',
   };
 
   return (
-    <section>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
-        <h2 className="text-muted" style={{ fontSize: '13px', fontWeight: 600 }}>
-          Theme colours {themeName && <span style={{ fontWeight: 400 }}>— {themeName}</span>}
-        </h2>
-        {!editing && (
-          <button
-            onClick={() => setEditing(true)}
-            className="text-accent"
-            style={{ fontSize: '12px', background: 'none', border: 'none', cursor: 'pointer' }}
-          >
-            Edit
-          </button>
-        )}
-      </div>
+    <div style={{ maxWidth: '600px' }}>
+      {/* Brand colours */}
+      <section>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
+          <h2 className="text-muted" style={sectionHeadingStyle}>
+            Brand colours {themeName && <span style={{ fontWeight: 400 }}>— {themeName}</span>}
+          </h2>
+          {!editing && colours && (
+            <button
+              onClick={() => setEditing(true)}
+              className="text-accent"
+              style={{ fontSize: '12px', background: 'none', border: 'none', cursor: 'pointer' }}
+            >
+              Edit
+            </button>
+          )}
+        </div>
 
-      {editing ? (
-        <div className="bg-card border border-border" style={{ borderRadius: '6px', padding: '12px' }}>
-          <div style={inputRowStyle}>
-            <input type="color" value={primary} onChange={e => setPrimary(e.target.value)} style={{ width: '28px', height: '28px', border: 'none', padding: 0, cursor: 'pointer' }} />
-            <span className="text-text" style={{ fontSize: '12px', flex: 1 }}>Primary</span>
-            <input type="text" value={primary} onChange={e => setPrimary(e.target.value)} className="text-text bg-surface border border-border" style={{ fontSize: '11px', fontFamily: 'monospace', width: '80px', padding: '4px 6px', borderRadius: '3px' }} />
+        {!colours ? (
+          <div className="bg-card border border-border" style={{ ...cardStyle, padding: '24px', textAlign: 'center' }}>
+            <p className="text-muted" style={{ fontSize: '13px' }}>No custom theme found. Create a site with a Synced theme to edit colours.</p>
           </div>
-          <div style={inputRowStyle}>
-            <input type="color" value={secondary} onChange={e => setSecondary(e.target.value)} style={{ width: '28px', height: '28px', border: 'none', padding: 0, cursor: 'pointer' }} />
-            <span className="text-text" style={{ fontSize: '12px', flex: 1 }}>Secondary</span>
-            <input type="text" value={secondary} onChange={e => setSecondary(e.target.value)} className="text-text bg-surface border border-border" style={{ fontSize: '11px', fontFamily: 'monospace', width: '80px', padding: '4px 6px', borderRadius: '3px' }} />
+        ) : editing ? (
+          <div className="bg-card border border-border" style={cardStyle}>
+            <div style={colourRowStyle}>
+              <input type="color" value={primary} onChange={e => setPrimary(e.target.value)} style={{ width: '32px', height: '32px', border: 'none', padding: 0, cursor: 'pointer' }} />
+              <span className="text-text" style={{ fontSize: '13px', flex: 1 }}>Primary</span>
+              <input type="text" value={primary} onChange={e => setPrimary(e.target.value)} className="text-text bg-surface border border-border" style={{ fontSize: '12px', fontFamily: 'monospace', width: '90px', padding: '6px 8px', borderRadius: '4px' }} />
+            </div>
+            <div style={colourRowStyle}>
+              <input type="color" value={secondary} onChange={e => setSecondary(e.target.value)} style={{ width: '32px', height: '32px', border: 'none', padding: 0, cursor: 'pointer' }} />
+              <span className="text-text" style={{ fontSize: '13px', flex: 1 }}>Secondary</span>
+              <input type="text" value={secondary} onChange={e => setSecondary(e.target.value)} className="text-text bg-surface border border-border" style={{ fontSize: '12px', fontFamily: 'monospace', width: '90px', padding: '6px 8px', borderRadius: '4px' }} />
+            </div>
+            <div style={{ ...colourRowStyle, borderBottom: 'none' }}>
+              <input type="color" value={accent} onChange={e => setAccent(e.target.value)} style={{ width: '32px', height: '32px', border: 'none', padding: 0, cursor: 'pointer' }} />
+              <span className="text-text" style={{ fontSize: '13px', flex: 1 }}>Accent</span>
+              <input type="text" value={accent} onChange={e => setAccent(e.target.value)} className="text-text bg-surface border border-border" style={{ fontSize: '12px', fontFamily: 'monospace', width: '90px', padding: '6px 8px', borderRadius: '4px' }} />
+            </div>
+            <div style={{ display: 'flex', gap: '8px', justifyContent: 'flex-end', padding: '12px 16px', borderTop: '1px solid var(--color-border)' }}>
+              <button onClick={() => { setEditing(false); setPrimary(colours.primary); setSecondary(colours.secondary); setAccent(colours.accent); }} className="text-text bg-border" style={{ padding: '8px 16px', borderRadius: '4px', fontSize: '13px', border: 'none', cursor: 'pointer' }}>Cancel</button>
+              <button onClick={handleSave} disabled={saving} className="text-white bg-accent" style={{ padding: '8px 16px', borderRadius: '4px', fontSize: '13px', border: 'none', cursor: 'pointer', opacity: saving ? 0.7 : 1 }}>{saving ? 'Saving...' : 'Save'}</button>
+            </div>
           </div>
-          <div style={{ ...inputRowStyle, marginBottom: '12px' }}>
-            <input type="color" value={accent} onChange={e => setAccent(e.target.value)} style={{ width: '28px', height: '28px', border: 'none', padding: 0, cursor: 'pointer' }} />
-            <span className="text-text" style={{ fontSize: '12px', flex: 1 }}>Accent</span>
-            <input type="text" value={accent} onChange={e => setAccent(e.target.value)} className="text-text bg-surface border border-border" style={{ fontSize: '11px', fontFamily: 'monospace', width: '80px', padding: '4px 6px', borderRadius: '3px' }} />
+        ) : (
+          <div className="bg-card border border-border" style={cardStyle}>
+            <div style={colourRowStyle}>
+              <div style={swatchStyle(colours.primary)} />
+              <span className="text-text" style={{ fontSize: '13px', flex: 1 }}>Primary</span>
+              <span className="text-muted" style={{ fontSize: '12px', fontFamily: 'monospace' }}>{colours.primary}</span>
+            </div>
+            <div style={colourRowStyle}>
+              <div style={swatchStyle(colours.secondary)} />
+              <span className="text-text" style={{ fontSize: '13px', flex: 1 }}>Secondary</span>
+              <span className="text-muted" style={{ fontSize: '12px', fontFamily: 'monospace' }}>{colours.secondary}</span>
+            </div>
+            <div style={{ ...colourRowStyle, borderBottom: 'none' }}>
+              <div style={swatchStyle(colours.accent)} />
+              <span className="text-text" style={{ fontSize: '13px', flex: 1 }}>Accent</span>
+              <span className="text-muted" style={{ fontSize: '12px', fontFamily: 'monospace' }}>{colours.accent}</span>
+            </div>
           </div>
-          <div style={{ display: 'flex', gap: '6px', justifyContent: 'flex-end' }}>
-            <button onClick={() => { setEditing(false); setPrimary(colours.primary); setSecondary(colours.secondary); setAccent(colours.accent); }} className="text-text bg-border" style={{ padding: '6px 12px', borderRadius: '4px', fontSize: '12px', border: 'none', cursor: 'pointer' }}>Cancel</button>
-            <button onClick={handleSave} disabled={saving} className="text-white bg-accent" style={{ padding: '6px 12px', borderRadius: '4px', fontSize: '12px', border: 'none', cursor: 'pointer', opacity: saving ? 0.7 : 1 }}>{saving ? 'Saving...' : 'Save'}</button>
-          </div>
-        </div>
-      ) : (
-        <div style={{ display: 'flex', gap: '12px' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-            <div style={swatchStyle(colours.primary)} />
-            <span className="text-muted" style={{ fontSize: '11px' }}>Primary</span>
-          </div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-            <div style={swatchStyle(colours.secondary)} />
-            <span className="text-muted" style={{ fontSize: '11px' }}>Secondary</span>
-          </div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-            <div style={swatchStyle(colours.accent)} />
-            <span className="text-muted" style={{ fontSize: '11px' }}>Accent</span>
-          </div>
-        </div>
-      )}
-    </section>
+        )}
+      </section>
+    </div>
   );
 }
 
