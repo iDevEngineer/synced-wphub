@@ -245,12 +245,15 @@ function OverviewTab({ site, isRunning, wpAdminUrl }: OverviewTabProps) {
 
   const [editorLabel, setEditorLabel] = useState('Editor');
   const [terminalLabel, setTerminalLabel] = useState('Terminal');
+  const [wpVersion, setWpVersion] = useState('—');
+  const [phpVersion, setPhpVersion] = useState('—');
 
   useEffect(() => {
     Promise.all([
       fetch('/api/config').then(r => r.json()),
       fetch('/api/environment').then(r => r.json()),
-    ]).then(([configData, envData]) => {
+      fetch(`/api/sites/${site.slug}/info`).then(r => r.json()),
+    ]).then(([configData, envData, infoData]) => {
       const cfg = configData.config ?? configData;
       const editors: { id: string; label: string }[] = envData.editors ?? [];
       const terminals: { id: string; label: string }[] = envData.terminals ?? [];
@@ -263,8 +266,10 @@ function OverviewTab({ site, isRunning, wpAdminUrl }: OverviewTabProps) {
         const match = terminals.find(t => t.id === cfg.terminal);
         setTerminalLabel(match?.label ?? cfg.terminalApp ?? 'Terminal');
       }
+      if (infoData.wpVersion) setWpVersion(infoData.wpVersion);
+      if (infoData.phpVersion) setPhpVersion(infoData.phpVersion);
     }).catch(() => {});
-  }, []);
+  }, [site.slug]);
 
   function openInFinder() {
     if (site.path) fetch(`/api/sites/${site.slug}/open-finder`, { method: 'POST' });
@@ -334,6 +339,20 @@ function OverviewTab({ site, isRunning, wpAdminUrl }: OverviewTabProps) {
               href={isRunning && menusUrl ? menusUrl : undefined}
               disabled={!isRunning}
             />
+          </div>
+        </section>
+
+        {/* Site info */}
+        <section>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
+            <div className="bg-card border border-border rounded p-3">
+              <p className="text-muted" style={{ fontSize: '11px', marginBottom: '2px' }}>WordPress</p>
+              <p className="text-text font-medium" style={{ fontSize: '13px' }}>{wpVersion}</p>
+            </div>
+            <div className="bg-card border border-border rounded p-3">
+              <p className="text-muted" style={{ fontSize: '11px', marginBottom: '2px' }}>PHP</p>
+              <p className="text-text font-medium" style={{ fontSize: '13px' }}>{phpVersion}</p>
+            </div>
           </div>
         </section>
 

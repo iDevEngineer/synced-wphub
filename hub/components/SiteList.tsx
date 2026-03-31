@@ -116,9 +116,15 @@ function SiteRow({ site, isSelected, onClick }: { site: Site; isSelected: boolea
         </span>
       </div>
       {isRunning && site.url && (
-        <p className="text-xs mt-1 ml-4 truncate text-muted">
+        <a
+          href={site.url}
+          target="_blank"
+          rel="noopener noreferrer"
+          onClick={(e) => e.stopPropagation()}
+          className="block text-xs mt-1 ml-4 truncate text-accent hover:underline"
+        >
           {site.url}
-        </p>
+        </a>
       )}
     </button>
   );
