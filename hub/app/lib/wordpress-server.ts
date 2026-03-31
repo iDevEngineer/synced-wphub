@@ -1,7 +1,7 @@
 // Server-side wrapper for wordpress lib functions
 import 'server-only';
 import { execa } from 'execa';
-import { existsSync, mkdirSync, createWriteStream, readFileSync, writeFileSync } from 'fs';
+import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'fs';
 import { join } from 'path';
 import { createRequire } from 'module';
 import { fileURLToPath } from 'url';
@@ -113,17 +113,18 @@ export async function startWordPress(sitePath: string, port: number, blueprintPa
   const logsDir = join(homedir(), '.synced', 'logs');
   mkdirSync(logsDir, { recursive: true });
   const logPath = join(logsDir, `${slug}.log`);
-  const logStream = createWriteStream(logPath, { flags: 'w' });
 
-  let proc;
-  if (wpNowBin) {
-    proc = execa('node', [wpNowBin, ...args], { detached: true, stdio: ['ignore', 'pipe', 'pipe'] });
-  } else {
-    proc = execa('npx', ['@wp-now/wp-now', ...args], { detached: true, stdio: ['ignore', 'pipe', 'pipe'] });
-  }
+  // Use shell redirection for logging so the child is fully detached
+  const cmd = wpNowBin
+    ? `node ${wpNowBin} ${args.join(' ')} >> "${logPath}" 2>&1`
+    : `npx @wp-now/wp-now ${args.join(' ')} >> "${logPath}" 2>&1`;
 
-  proc.stdout?.pipe(logStream);
-  proc.stderr?.pipe(logStream);
+  const proc = execa('sh', ['-c', cmd], {
+    detached: true,
+    stdio: 'ignore',
+    env: { ...process.env, NODE_NO_WARNINGS: '1' },
+  });
+
   proc.unref();
   await new Promise((resolve) => setTimeout(resolve, 3000));
 
