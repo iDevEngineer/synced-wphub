@@ -54,10 +54,10 @@ export default function SyncPanel({ slug, staging }: Props) {
   if (!staging) {
     return (
       <div>
-        <h2 className="text-base font-semibold mb-3" style={{ color: '#f9fafb' }}>
+        <h2 className="text-base font-semibold mb-3 text-text">
           Sync
         </h2>
-        <p className="text-sm" style={{ color: '#9ca3af' }}>
+        <p className="text-sm text-muted">
           No hosting provider configured. Add one in Settings to enable deploy, push, and pull.
         </p>
       </div>
@@ -69,27 +69,26 @@ export default function SyncPanel({ slug, staging }: Props) {
       <div className="grid grid-cols-2 gap-6">
         {/* Push */}
         <div>
-          <h3 className="text-sm font-semibold mb-1" style={{ color: '#f9fafb' }}>
+          <h3 className="text-sm font-semibold mb-1 text-text">
             Push to staging
           </h3>
-          <p className="text-xs mb-3" style={{ color: '#9ca3af' }}>
+          <p className="text-xs mb-3 text-muted">
             Copies your local database to staging. Remote data will be overwritten.
           </p>
           <button
             onClick={handlePush}
             disabled={pushLoading}
-            className="px-4 py-2 rounded text-sm font-medium transition-colors disabled:opacity-50"
-            style={{ backgroundColor: '#3d4147', color: '#f9fafb' }}
+            className="px-4 py-2 rounded text-sm font-medium transition-colors disabled:opacity-50 bg-border text-text"
           >
             {pushLoading ? 'Pushing...' : 'Push to staging'}
           </button>
           {pushMessage && (
-            <p className="text-xs mt-2" style={{ color: '#34d399' }}>
+            <p className="text-xs mt-2 text-green-400">
               {pushMessage}
             </p>
           )}
           {pushError && (
-            <p className="text-xs mt-2" style={{ color: '#f87171' }}>
+            <p className="text-xs mt-2 text-red-400">
               {pushError}
             </p>
           )}
@@ -97,27 +96,26 @@ export default function SyncPanel({ slug, staging }: Props) {
 
         {/* Pull */}
         <div>
-          <h3 className="text-sm font-semibold mb-1" style={{ color: '#f9fafb' }}>
+          <h3 className="text-sm font-semibold mb-1 text-text">
             Pull from staging
           </h3>
-          <p className="text-xs mb-3" style={{ color: '#9ca3af' }}>
+          <p className="text-xs mb-3 text-muted">
             Copies the staging database to local. Local data will be overwritten.
           </p>
           <button
             onClick={handlePullClick}
             disabled={pullLoading}
-            className="px-4 py-2 rounded text-sm font-medium transition-colors disabled:opacity-50"
-            style={{ backgroundColor: '#3d4147', color: '#f9fafb' }}
+            className="px-4 py-2 rounded text-sm font-medium transition-colors disabled:opacity-50 bg-border text-text"
           >
             {pullLoading ? 'Pulling...' : 'Pull from staging'}
           </button>
           {pullMessage && (
-            <p className="text-xs mt-2" style={{ color: '#34d399' }}>
+            <p className="text-xs mt-2 text-green-400">
               {pullMessage}
             </p>
           )}
           {pullError && (
-            <p className="text-xs mt-2" style={{ color: '#f87171' }}>
+            <p className="text-xs mt-2 text-red-400">
               {pullError}
             </p>
           )}
@@ -127,28 +125,25 @@ export default function SyncPanel({ slug, staging }: Props) {
       {/* Pull confirm modal */}
       {showPullConfirm && (
         <div
-          className="fixed inset-0 flex items-center justify-center z-50"
-          style={{ backgroundColor: 'rgba(0,0,0,0.7)' }}
+          className="fixed inset-0 flex items-center justify-center bg-black/70"
+          style={{ zIndex: 50 }}
         >
           <div
-            className="rounded-lg p-6 max-w-sm w-full mx-4 border"
-            style={{ backgroundColor: '#2b2f33', borderColor: '#3d4147' }}
+            className="rounded-lg p-6 max-w-sm w-full mx-4 border bg-surface border-border"
           >
-            <p className="text-sm mb-6" style={{ color: '#f9fafb' }}>
+            <p className="text-sm mb-6 text-text">
               This will overwrite your local database with staging data. This cannot be undone. Continue?
             </p>
             <div className="flex items-center gap-3">
               <button
                 onClick={handlePullConfirm}
-                className="flex-1 px-4 py-2 rounded text-sm font-medium"
-                style={{ backgroundColor: '#e05a2b', color: '#fff' }}
+                className="flex-1 px-4 py-2 rounded text-sm font-medium bg-accent text-white"
               >
                 Yes, overwrite local
               </button>
               <button
                 onClick={() => setShowPullConfirm(false)}
-                className="flex-1 px-4 py-2 rounded text-sm font-medium"
-                style={{ backgroundColor: '#3d4147', color: '#f9fafb' }}
+                className="flex-1 px-4 py-2 rounded text-sm font-medium bg-border text-text"
               >
                 Cancel
               </button>

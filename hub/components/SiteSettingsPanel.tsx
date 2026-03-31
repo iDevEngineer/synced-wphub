@@ -59,8 +59,8 @@ export default function SiteSettingsPanel({ slug, staging, onSaved }: Props) {
   return (
     <div className="max-w-lg">
       <h2
-        className="text-sm font-semibold mb-4"
-        style={{ color: '#9ca3af', textTransform: 'uppercase', letterSpacing: '0.05em' }}
+        className="text-sm font-semibold mb-4 text-muted"
+        style={{ textTransform: 'uppercase', letterSpacing: '0.05em' }}
       >
         Staging configuration
       </h2>
@@ -70,8 +70,7 @@ export default function SiteSettingsPanel({ slug, staging, onSaved }: Props) {
           <select
             value={form.provider}
             onChange={(e) => handleChange('provider', e.target.value)}
-            className="w-full px-3 py-2 rounded text-sm"
-            style={{ backgroundColor: '#1a1d20', color: '#f9fafb', border: '1px solid #3d4147' }}
+            className="w-full px-3 py-2 rounded text-sm bg-bg text-text border border-border"
           >
             {PROVIDERS.map((p) => (
               <option key={p.value} value={p.value}>{p.label}</option>
@@ -85,8 +84,7 @@ export default function SiteSettingsPanel({ slug, staging, onSaved }: Props) {
             value={form.sshHost}
             onChange={(e) => handleChange('sshHost', e.target.value)}
             placeholder="staging.clientsite.com"
-            className="w-full px-3 py-2 rounded text-sm"
-            style={{ backgroundColor: '#1a1d20', color: '#f9fafb', border: '1px solid #3d4147' }}
+            className="w-full px-3 py-2 rounded text-sm bg-bg text-text border border-border"
           />
         </Field>
 
@@ -96,8 +94,7 @@ export default function SiteSettingsPanel({ slug, staging, onSaved }: Props) {
             value={form.sshUser}
             onChange={(e) => handleChange('sshUser', e.target.value)}
             placeholder="deploy"
-            className="w-full px-3 py-2 rounded text-sm"
-            style={{ backgroundColor: '#1a1d20', color: '#f9fafb', border: '1px solid #3d4147' }}
+            className="w-full px-3 py-2 rounded text-sm bg-bg text-text border border-border"
           />
         </Field>
 
@@ -107,8 +104,7 @@ export default function SiteSettingsPanel({ slug, staging, onSaved }: Props) {
             value={form.wpPath}
             onChange={(e) => handleChange('wpPath', e.target.value)}
             placeholder="/var/www/html"
-            className="w-full px-3 py-2 rounded text-sm"
-            style={{ backgroundColor: '#1a1d20', color: '#f9fafb', border: '1px solid #3d4147' }}
+            className="w-full px-3 py-2 rounded text-sm bg-bg text-text border border-border"
           />
         </Field>
 
@@ -118,8 +114,7 @@ export default function SiteSettingsPanel({ slug, staging, onSaved }: Props) {
             value={form.stagingUrl}
             onChange={(e) => handleChange('stagingUrl', e.target.value)}
             placeholder="https://staging.clientsite.com"
-            className="w-full px-3 py-2 rounded text-sm"
-            style={{ backgroundColor: '#1a1d20', color: '#f9fafb', border: '1px solid #3d4147' }}
+            className="w-full px-3 py-2 rounded text-sm bg-bg text-text border border-border"
           />
         </Field>
       </div>
@@ -128,16 +123,15 @@ export default function SiteSettingsPanel({ slug, staging, onSaved }: Props) {
         <button
           onClick={handleSave}
           disabled={saving}
-          className="px-4 py-2 rounded text-sm font-medium disabled:opacity-50"
-          style={{ backgroundColor: '#e05a2b', color: '#fff' }}
+          className="px-4 py-2 rounded text-sm font-medium disabled:opacity-50 bg-accent text-white"
         >
           {saving ? 'Saving...' : 'Save settings'}
         </button>
         {saved && (
-          <span className="text-sm" style={{ color: '#34d399' }}>Settings saved.</span>
+          <span className="text-sm text-green-400">Settings saved.</span>
         )}
         {error && (
-          <span className="text-sm" style={{ color: '#f87171' }}>{error}</span>
+          <span className="text-sm text-red-400">{error}</span>
         )}
       </div>
     </div>
@@ -147,7 +141,7 @@ export default function SiteSettingsPanel({ slug, staging, onSaved }: Props) {
 function Field({ label, children }: { label: string; children: React.ReactNode }) {
   return (
     <div>
-      <label className="block text-sm mb-1.5" style={{ color: '#9ca3af' }}>{label}</label>
+      <label className="block text-sm mb-1.5 text-muted">{label}</label>
       {children}
     </div>
   );

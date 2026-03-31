@@ -110,124 +110,36 @@ export default function CreateSiteModal({ onClose, onCreated }: Props) {
     }
   }
 
-  // ── Styles ────────────────────────────────────────────────────────────────
-
-  const overlay: React.CSSProperties = {
-    position: 'fixed',
-    inset: 0,
-    backgroundColor: 'rgba(0,0,0,0.6)',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    zIndex: 50,
-  };
-
-  const modal: React.CSSProperties = {
-    backgroundColor: '#2b2f33',
-    border: '1px solid #3d4147',
-    borderRadius: '8px',
-    width: '480px',
-    maxWidth: 'calc(100vw - 32px)',
-    display: 'flex',
-    flexDirection: 'column',
-    overflow: 'hidden',
-  };
-
-  const header: React.CSSProperties = {
-    padding: '20px 24px 16px',
-    borderBottom: '1px solid #3d4147',
-  };
-
-  const body: React.CSSProperties = {
-    padding: '20px 24px',
-    display: 'flex',
-    flexDirection: 'column',
-    gap: '16px',
-  };
-
-  const footer: React.CSSProperties = {
-    padding: '12px 24px 20px',
-    display: 'flex',
-    justifyContent: 'flex-end',
-    gap: '10px',
-  };
-
-  const inputStyle: React.CSSProperties = {
-    width: '100%',
-    padding: '9px 12px',
-    backgroundColor: '#1a1d20',
-    border: '1px solid #3d4147',
-    borderRadius: '6px',
-    color: '#f9fafb',
-    fontSize: '14px',
-    outline: 'none',
-    boxSizing: 'border-box',
-  };
-
-  const logArea: React.CSSProperties = {
-    backgroundColor: '#1a1d20',
-    border: '1px solid #3d4147',
-    borderRadius: '6px',
-    padding: '12px',
-    height: '220px',
-    overflowY: 'auto',
-    fontFamily: 'monospace',
-    fontSize: '12px',
-    lineHeight: '1.6',
-    color: '#9ca3af',
-  };
-
-  const btnPrimary: React.CSSProperties = {
-    padding: '8px 18px',
-    backgroundColor: '#e05a2b',
-    color: '#fff',
-    border: 'none',
-    borderRadius: '6px',
-    fontSize: '14px',
-    fontWeight: 500,
-    cursor: 'pointer',
-  };
-
-  const btnPrimaryDisabled: React.CSSProperties = {
-    ...btnPrimary,
-    opacity: 0.5,
-    cursor: 'default',
-  };
-
-  const btnSecondary: React.CSSProperties = {
-    padding: '8px 18px',
-    backgroundColor: 'transparent',
-    color: '#9ca3af',
-    border: '1px solid #3d4147',
-    borderRadius: '6px',
-    fontSize: '14px',
-    fontWeight: 500,
-    cursor: 'pointer',
-  };
-
   // ── Render ────────────────────────────────────────────────────────────────
 
   return (
-    <div style={overlay} onClick={(e) => { if (e.target === e.currentTarget && phase === 'input') onClose(); }}>
-      <div style={modal}>
+    <div
+      className="fixed inset-0 flex items-center justify-center bg-black/60"
+      style={{ zIndex: 50 }}
+      onClick={(e) => { if (e.target === e.currentTarget && phase === 'input') onClose(); }}
+    >
+      <div
+        className="bg-surface border border-border rounded-lg flex flex-col overflow-hidden"
+        style={{ width: '480px', maxWidth: 'calc(100vw - 32px)' }}
+      >
 
         {/* Header */}
-        <div style={header}>
-          <h2 style={{ margin: 0, fontSize: '16px', fontWeight: 600, color: '#f9fafb' }}>
+        <div className="border-b border-border" style={{ padding: '20px 24px 16px' }}>
+          <h2 className="text-text" style={{ margin: 0, fontSize: '16px', fontWeight: 600 }}>
             {phase === 'done' ? 'Site created' : phase === 'error' ? 'Creation failed' : 'Create site'}
           </h2>
           {phase === 'input' && (
-            <p style={{ margin: '4px 0 0', fontSize: '13px', color: '#9ca3af' }}>
+            <p className="text-muted" style={{ margin: '4px 0 0', fontSize: '13px' }}>
               Enter a name for the new WordPress site.
             </p>
           )}
         </div>
 
         {/* Body */}
-        <div style={body}>
+        <div style={{ padding: '20px 24px', display: 'flex', flexDirection: 'column', gap: '16px' }}>
           {phase === 'input' && (
             <div>
-              <label style={{ display: 'block', marginBottom: '6px', fontSize: '13px', color: '#9ca3af' }}>
+              <label className="text-muted" style={{ display: 'block', marginBottom: '6px', fontSize: '13px' }}>
                 Site name
               </label>
               <input
@@ -237,24 +149,44 @@ export default function CreateSiteModal({ onClose, onCreated }: Props) {
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 onKeyDown={handleKeyDown}
-                style={inputStyle}
+                className="bg-bg border border-border text-text"
+                style={{
+                  width: '100%',
+                  padding: '9px 12px',
+                  borderRadius: '6px',
+                  fontSize: '14px',
+                  outline: 'none',
+                  boxSizing: 'border-box',
+                }}
               />
             </div>
           )}
 
           {(phase === 'progress' || phase === 'done') && (
             <div>
-              <p style={{ margin: '0 0 8px', fontSize: '13px', color: '#9ca3af' }}>
+              <p className="text-muted" style={{ margin: '0 0 8px', fontSize: '13px' }}>
                 {phase === 'done' ? 'All done.' : 'Creating your site — this may take a minute…'}
               </p>
-              <div ref={logRef} style={logArea}>
+              <div
+                ref={logRef}
+                className="bg-bg border border-border text-muted"
+                style={{
+                  borderRadius: '6px',
+                  padding: '12px',
+                  height: '220px',
+                  overflowY: 'auto',
+                  fontFamily: 'monospace',
+                  fontSize: '12px',
+                  lineHeight: '1.6',
+                }}
+              >
                 {logs.map((line, i) => (
-                  <div key={i} style={{ color: line.startsWith('✓') || line.startsWith('Site created') ? '#4ade80' : '#9ca3af' }}>
+                  <div key={i} className={line.startsWith('✓') || line.startsWith('Site created') ? 'text-green-400' : 'text-muted'}>
                     {line}
                   </div>
                 ))}
                 {phase === 'progress' && (
-                  <div style={{ color: '#e05a2b', marginTop: '4px' }}>▋</div>
+                  <div className="text-accent" style={{ marginTop: '4px' }}>▋</div>
                 )}
               </div>
             </div>
@@ -267,7 +199,7 @@ export default function CreateSiteModal({ onClose, onCreated }: Props) {
               borderRadius: '6px',
               padding: '12px',
             }}>
-              <p style={{ margin: 0, fontSize: '13px', color: '#f87171' }}>
+              <p className="text-red-400" style={{ margin: 0, fontSize: '13px' }}>
                 {errorMsg ?? 'An error occurred.'}
               </p>
             </div>
@@ -275,14 +207,34 @@ export default function CreateSiteModal({ onClose, onCreated }: Props) {
         </div>
 
         {/* Footer */}
-        <div style={footer}>
+        <div style={{ padding: '12px 24px 20px', display: 'flex', justifyContent: 'flex-end', gap: '10px' }}>
           {phase === 'input' && (
             <>
-              <button style={btnSecondary} onClick={onClose}>
+              <button
+                className="text-muted border border-border"
+                style={{
+                  padding: '8px 18px',
+                  backgroundColor: 'transparent',
+                  borderRadius: '6px',
+                  fontSize: '14px',
+                  fontWeight: 500,
+                  cursor: 'pointer',
+                }}
+                onClick={onClose}
+              >
                 Cancel
               </button>
               <button
-                style={name.trim() ? btnPrimary : btnPrimaryDisabled}
+                className="bg-accent text-white"
+                style={{
+                  padding: '8px 18px',
+                  border: 'none',
+                  borderRadius: '6px',
+                  fontSize: '14px',
+                  fontWeight: 500,
+                  cursor: name.trim() ? 'pointer' : 'default',
+                  opacity: name.trim() ? 1 : 0.5,
+                }}
                 disabled={!name.trim()}
                 onClick={handleCreate}
               >
@@ -292,13 +244,24 @@ export default function CreateSiteModal({ onClose, onCreated }: Props) {
           )}
 
           {phase === 'progress' && (
-            <span style={{ fontSize: '13px', color: '#9ca3af', alignSelf: 'center' }}>
+            <span className="text-muted" style={{ fontSize: '13px', alignSelf: 'center' }}>
               Please wait…
             </span>
           )}
 
           {(phase === 'done' || phase === 'error') && (
-            <button style={btnPrimary} onClick={onClose}>
+            <button
+              className="bg-accent text-white"
+              style={{
+                padding: '8px 18px',
+                border: 'none',
+                borderRadius: '6px',
+                fontSize: '14px',
+                fontWeight: 500,
+                cursor: 'pointer',
+              }}
+              onClick={onClose}
+            >
               Close
             </button>
           )}

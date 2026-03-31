@@ -14,10 +14,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <body
-        style={{ height: '100vh', margin: 0 }}
-        data-theme="dark"
-      >
+      <body data-theme="dark" className="h-screen m-0 bg-bg text-text">
         <ThemeApplier />
         {children}
       </body>

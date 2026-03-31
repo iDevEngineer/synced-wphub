@@ -34,23 +34,15 @@ export default function DeleteSiteModal({ slug, siteName, onDeleted, onClose }: 
 
   return (
     <div
-      style={{
-        position: 'fixed',
-        inset: 0,
-        backgroundColor: 'rgba(0, 0, 0, 0.6)',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        zIndex: 50,
-      }}
+      className="fixed inset-0 flex items-center justify-center bg-black/60"
+      style={{ zIndex: 50 }}
       onClick={(e) => {
         if (e.target === e.currentTarget) onClose();
       }}
     >
       <div
+        className="bg-surface border border-border"
         style={{
-          backgroundColor: '#2b2f33',
-          border: '1px solid #3d4147',
           borderRadius: '8px',
           padding: '24px',
           width: '100%',
@@ -59,10 +51,10 @@ export default function DeleteSiteModal({ slug, siteName, onDeleted, onClose }: 
         }}
       >
         <h2
+          className="text-text"
           style={{
             fontSize: '16px',
             fontWeight: 600,
-            color: '#f9fafb',
             marginBottom: '8px',
           }}
         >
@@ -70,14 +62,14 @@ export default function DeleteSiteModal({ slug, siteName, onDeleted, onClose }: 
         </h2>
 
         <p
+          className="text-muted"
           style={{
             fontSize: '14px',
-            color: '#9ca3af',
             marginBottom: '20px',
             lineHeight: '1.5',
           }}
         >
-          This will remove <strong style={{ color: '#f9fafb' }}>{siteName}</strong> from Synced.
+          This will remove <strong className="text-text">{siteName}</strong> from Synced.
         </p>
 
         <label
@@ -96,16 +88,16 @@ export default function DeleteSiteModal({ slug, siteName, onDeleted, onClose }: 
             type="checkbox"
             checked={deleteFiles}
             onChange={(e) => setDeleteFiles(e.target.checked)}
-            style={{ accentColor: '#e05a2b', width: '14px', height: '14px', cursor: 'pointer' }}
+            style={{ accentColor: 'var(--color-accent)', width: '14px', height: '14px', cursor: 'pointer' }}
           />
           Also delete local files
         </label>
 
         {error && (
           <p
+            className="text-red-400"
             style={{
               fontSize: '13px',
-              color: '#f87171',
               marginBottom: '16px',
             }}
           >
@@ -117,13 +109,12 @@ export default function DeleteSiteModal({ slug, siteName, onDeleted, onClose }: 
           <button
             onClick={onClose}
             disabled={loading}
+            className="bg-border text-text"
             style={{
               padding: '7px 16px',
               borderRadius: '6px',
               fontSize: '14px',
               fontWeight: 500,
-              backgroundColor: '#3d4147',
-              color: '#f9fafb',
               border: 'none',
               cursor: loading ? 'not-allowed' : 'pointer',
               opacity: loading ? 0.5 : 1,
@@ -134,13 +125,13 @@ export default function DeleteSiteModal({ slug, siteName, onDeleted, onClose }: 
           <button
             onClick={handleDelete}
             disabled={loading}
+            className="text-white"
             style={{
               padding: '7px 16px',
               borderRadius: '6px',
               fontSize: '14px',
               fontWeight: 500,
               backgroundColor: '#dc2626',
-              color: '#fff',
               border: 'none',
               cursor: loading ? 'not-allowed' : 'pointer',
               opacity: loading ? 0.7 : 1,

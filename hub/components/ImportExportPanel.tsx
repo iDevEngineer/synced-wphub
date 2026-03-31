@@ -95,38 +95,27 @@ export default function ImportExportPanel({ slug }: Props) {
     <div style={{ display: 'flex', flexDirection: 'column', gap: '32px' }}>
       {/* Export section */}
       <section>
-        <h2
-          style={{
-            fontSize: '13px',
-            fontWeight: 600,
-            color: '#9ca3af',
-            textTransform: 'uppercase',
-            letterSpacing: '0.05em',
-            marginBottom: '12px',
-          }}
-        >
+        <h2 className="text-muted" style={{
+          fontSize: '13px',
+          fontWeight: 600,
+          textTransform: 'uppercase',
+          letterSpacing: '0.05em',
+          marginBottom: '12px',
+        }}>
           Export database
         </h2>
-        <div
-          style={{
-            backgroundColor: '#242830',
-            border: '1px solid #3d4147',
-            borderRadius: '8px',
-            padding: '20px',
-          }}
-        >
-          <p style={{ fontSize: '14px', color: '#9ca3af', marginBottom: '16px' }}>
+        <div className="bg-card border border-border" style={{ borderRadius: '8px', padding: '20px' }}>
+          <p className="text-muted" style={{ fontSize: '14px', marginBottom: '16px' }}>
             Download your local database as a SQL file.
           </p>
           <button
             onClick={handleExport}
             disabled={exporting}
+            className="bg-border text-text"
             style={{
               display: 'flex',
               alignItems: 'center',
               gap: '8px',
-              backgroundColor: '#3d4147',
-              color: '#f9fafb',
               border: 'none',
               borderRadius: '6px',
               padding: '8px 16px',
@@ -140,34 +129,24 @@ export default function ImportExportPanel({ slug }: Props) {
             {exporting ? 'Exporting...' : 'Export database'}
           </button>
           {exportError && (
-            <p style={{ fontSize: '13px', color: '#f87171', marginTop: '10px' }}>{exportError}</p>
+            <p className="text-red-400" style={{ fontSize: '13px', marginTop: '10px' }}>{exportError}</p>
           )}
         </div>
       </section>
 
       {/* Import section */}
       <section>
-        <h2
-          style={{
-            fontSize: '13px',
-            fontWeight: 600,
-            color: '#9ca3af',
-            textTransform: 'uppercase',
-            letterSpacing: '0.05em',
-            marginBottom: '12px',
-          }}
-        >
+        <h2 className="text-muted" style={{
+          fontSize: '13px',
+          fontWeight: 600,
+          textTransform: 'uppercase',
+          letterSpacing: '0.05em',
+          marginBottom: '12px',
+        }}>
           Import database
         </h2>
-        <div
-          style={{
-            backgroundColor: '#242830',
-            border: '1px solid #3d4147',
-            borderRadius: '8px',
-            padding: '20px',
-          }}
-        >
-          <p style={{ fontSize: '14px', color: '#9ca3af', marginBottom: '16px' }}>
+        <div className="bg-card border border-border" style={{ borderRadius: '8px', padding: '20px' }}>
+          <p className="text-muted" style={{ fontSize: '14px', marginBottom: '16px' }}>
             Restore from a SQL file. This will overwrite your local database.
           </p>
 
@@ -178,7 +157,7 @@ export default function ImportExportPanel({ slug }: Props) {
             onDrop={handleDrop}
             onClick={() => fileInputRef.current?.click()}
             style={{
-              border: `2px dashed ${dragOver ? '#e05a2b' : '#3d4147'}`,
+              border: `2px dashed ${dragOver ? 'var(--color-accent)' : 'var(--color-border)'}`,
               borderRadius: '8px',
               padding: '32px 20px',
               textAlign: 'center',
@@ -188,11 +167,11 @@ export default function ImportExportPanel({ slug }: Props) {
               marginBottom: '16px',
             }}
           >
-            <Upload size={24} style={{ color: '#6b7280', margin: '0 auto 10px' }} />
-            <p style={{ fontSize: '14px', color: '#9ca3af', marginBottom: '4px' }}>
-              Drag and drop a <code style={{ color: '#f9fafb' }}>.sql</code> file here
+            <Upload size={24} className="text-stopped" style={{ margin: '0 auto 10px' }} />
+            <p className="text-muted" style={{ fontSize: '14px', marginBottom: '4px' }}>
+              Drag and drop a <code className="text-text">.sql</code> file here
             </p>
-            <p style={{ fontSize: '12px', color: '#6b7280' }}>or click to browse</p>
+            <p className="text-stopped" style={{ fontSize: '12px' }}>or click to browse</p>
           </div>
 
           <input
@@ -205,29 +184,27 @@ export default function ImportExportPanel({ slug }: Props) {
 
           {selectedFile && (
             <div
+              className="bg-bg border border-border"
               style={{
                 display: 'flex',
                 alignItems: 'center',
                 gap: '12px',
                 padding: '10px 14px',
-                backgroundColor: '#1a1d20',
-                border: '1px solid #3d4147',
                 borderRadius: '6px',
                 marginBottom: '12px',
               }}
             >
-              <span style={{ fontSize: '13px', color: '#f9fafb', flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+              <span className="text-text" style={{ fontSize: '13px', flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                 {selectedFile.name}
               </span>
-              <span style={{ fontSize: '12px', color: '#6b7280', flexShrink: 0 }}>
+              <span className="text-stopped" style={{ fontSize: '12px', flexShrink: 0 }}>
                 {(selectedFile.size / 1024).toFixed(1)} KB
               </span>
               <button
                 onClick={() => setShowImportConfirm(true)}
                 disabled={importing}
+                className="bg-accent text-white"
                 style={{
-                  backgroundColor: '#e05a2b',
-                  color: '#fff',
                   border: 'none',
                   borderRadius: '5px',
                   padding: '6px 14px',
@@ -244,12 +221,12 @@ export default function ImportExportPanel({ slug }: Props) {
           )}
 
           {importSuccess && (
-            <p style={{ fontSize: '13px', color: '#34d399', marginTop: '8px' }}>
+            <p className="text-green-400" style={{ fontSize: '13px', marginTop: '8px' }}>
               Database imported successfully.
             </p>
           )}
           {importError && (
-            <p style={{ fontSize: '13px', color: '#f87171', marginTop: '8px' }}>{importError}</p>
+            <p className="text-red-400" style={{ fontSize: '13px', marginTop: '8px' }}>{importError}</p>
           )}
         </div>
       </section>
@@ -257,20 +234,12 @@ export default function ImportExportPanel({ slug }: Props) {
       {/* Import confirm modal */}
       {showImportConfirm && (
         <div
-          style={{
-            position: 'fixed',
-            inset: 0,
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            backgroundColor: 'rgba(0,0,0,0.7)',
-            zIndex: 50,
-          }}
+          className="fixed inset-0 flex items-center justify-center bg-black/70"
+          style={{ zIndex: 50 }}
         >
           <div
+            className="bg-surface border border-border"
             style={{
-              backgroundColor: '#2b2f33',
-              border: '1px solid #3d4147',
               borderRadius: '10px',
               padding: '24px',
               maxWidth: '380px',
@@ -281,10 +250,10 @@ export default function ImportExportPanel({ slug }: Props) {
             <div style={{ display: 'flex', alignItems: 'flex-start', gap: '12px', marginBottom: '20px' }}>
               <AlertTriangle size={20} style={{ color: '#f59e0b', flexShrink: 0, marginTop: '2px' }} />
               <div>
-                <p style={{ fontSize: '14px', fontWeight: 600, color: '#f9fafb', marginBottom: '6px' }}>
+                <p className="text-text" style={{ fontSize: '14px', fontWeight: 600, marginBottom: '6px' }}>
                   Overwrite local database?
                 </p>
-                <p style={{ fontSize: '13px', color: '#9ca3af' }}>
+                <p className="text-muted" style={{ fontSize: '13px' }}>
                   This will overwrite your local database. This cannot be undone. Continue?
                 </p>
               </div>
@@ -292,10 +261,9 @@ export default function ImportExportPanel({ slug }: Props) {
             <div style={{ display: 'flex', gap: '10px' }}>
               <button
                 onClick={handleImportConfirm}
+                className="bg-accent text-white"
                 style={{
                   flex: 1,
-                  backgroundColor: '#e05a2b',
-                  color: '#fff',
                   border: 'none',
                   borderRadius: '6px',
                   padding: '8px 16px',
@@ -308,10 +276,9 @@ export default function ImportExportPanel({ slug }: Props) {
               </button>
               <button
                 onClick={() => setShowImportConfirm(false)}
+                className="bg-border text-text"
                 style={{
                   flex: 1,
-                  backgroundColor: '#3d4147',
-                  color: '#f9fafb',
                   border: 'none',
                   borderRadius: '6px',
                   padding: '8px 16px',

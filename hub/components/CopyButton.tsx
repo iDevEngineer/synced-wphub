@@ -34,23 +34,23 @@ export default function CopyButton({ value, size = 13 }: Props) {
       <button
         onClick={handleCopy}
         title={copied ? 'Copied!' : 'Copy to clipboard'}
+        className={copied ? 'text-green-400' : 'text-stopped'}
         style={{
           background: 'none',
           border: 'none',
           cursor: 'pointer',
           padding: '2px 4px',
           borderRadius: '4px',
-          color: copied ? '#34d399' : '#6b7280',
           display: 'flex',
           alignItems: 'center',
           transition: 'color 0.15s',
           flexShrink: 0,
         }}
         onMouseEnter={(e) => {
-          if (!copied) (e.currentTarget as HTMLButtonElement).style.color = '#9ca3af';
+          if (!copied) (e.currentTarget as HTMLButtonElement).style.color = 'var(--color-muted)';
         }}
         onMouseLeave={(e) => {
-          if (!copied) (e.currentTarget as HTMLButtonElement).style.color = '#6b7280';
+          if (!copied) (e.currentTarget as HTMLButtonElement).style.color = 'var(--color-stopped)';
         }}
       >
         {copied ? <Check size={size} /> : <Copy size={size} />}
@@ -63,15 +63,15 @@ export default function CopyButton({ value, size = 13 }: Props) {
             left: '50%',
             transform: 'translateX(-50%)',
             marginBottom: '4px',
-            backgroundColor: '#374151',
-            color: '#f9fafb',
             fontSize: '11px',
             padding: '2px 6px',
             borderRadius: '4px',
             whiteSpace: 'nowrap',
             pointerEvents: 'none',
             zIndex: 50,
+            backgroundColor: 'var(--color-border)',
           }}
+          className="text-text"
         >
           Copied!
         </span>

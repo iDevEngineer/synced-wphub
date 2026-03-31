@@ -37,19 +37,18 @@ export default function DeployPanel({ slug, staging }: Props) {
 
   return (
     <div>
-      <h2 className="text-base font-semibold mb-3" style={{ color: '#f9fafb' }}>
+      <h2 className="text-base font-semibold mb-3 text-text">
         Deploy
       </h2>
 
       {!staging ? (
         <div>
-          <p className="text-sm mb-3" style={{ color: '#9ca3af' }}>
+          <p className="text-sm mb-3 text-muted">
             No hosting provider configured. Add one in Settings to enable deploy, push, and pull.
           </p>
           <Link
             href="/settings"
-            className="text-sm underline"
-            style={{ color: '#e05a2b' }}
+            className="text-sm underline text-accent"
           >
             Settings
           </Link>
@@ -58,8 +57,7 @@ export default function DeployPanel({ slug, staging }: Props) {
         <div>
           <div className="flex items-center gap-3 mb-4">
             <span
-              className="text-xs px-2 py-1 rounded font-medium"
-              style={{ backgroundColor: '#3d4147', color: '#9ca3af' }}
+              className="text-xs px-2 py-1 rounded font-medium bg-border text-muted"
             >
               {PROVIDER_LABELS[staging.provider] ?? staging.provider}
             </span>
@@ -68,8 +66,7 @@ export default function DeployPanel({ slug, staging }: Props) {
                 href={staging.stagingUrl}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-xs underline"
-                style={{ color: '#9ca3af' }}
+                className="text-xs underline text-muted"
               >
                 {staging.stagingUrl}
               </a>
@@ -79,19 +76,18 @@ export default function DeployPanel({ slug, staging }: Props) {
           <button
             onClick={handleDeploy}
             disabled={loading}
-            className="px-4 py-2 rounded text-sm font-medium transition-colors disabled:opacity-50"
-            style={{ backgroundColor: '#e05a2b', color: '#fff' }}
+            className="px-4 py-2 rounded text-sm font-medium transition-colors disabled:opacity-50 bg-accent text-white"
           >
             {loading ? 'Deploying...' : 'Deploy'}
           </button>
 
           {message && (
-            <p className="text-sm mt-3" style={{ color: '#34d399' }}>
+            <p className="text-sm mt-3 text-green-400">
               {message}
             </p>
           )}
           {error && (
-            <p className="text-sm mt-3" style={{ color: '#f87171' }}>
+            <p className="text-sm mt-3 text-red-400">
               {error}
             </p>
           )}

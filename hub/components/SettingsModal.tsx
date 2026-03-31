@@ -76,7 +76,6 @@ export default function SettingsModal({ onClose }: Props) {
   const handleEditorChange = useCallback(async (editorId: string) => {
     setCodeEditor(editorId);
     if (!config) return;
-    // Also store the actual app name so open-editor can use 'open -a AppName'
     const detected = env?.editors.find(e => e.id === editorId);
     const updated = { ...config, codeEditor: editorId, codeEditorApp: detected?.appName ?? editorId };
     setConfig(updated);
@@ -144,21 +143,13 @@ export default function SettingsModal({ onClose }: Props) {
 
   return (
     <div
-      style={{
-        position: 'fixed',
-        inset: 0,
-        backgroundColor: 'rgba(0,0,0,0.7)',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        zIndex: 1000,
-      }}
+      className="fixed inset-0 flex items-center justify-center bg-black/70"
+      style={{ zIndex: 1000 }}
       onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}
     >
       <div
+        className="bg-surface border border-border"
         style={{
-          backgroundColor: '#2b2f33',
-          border: '1px solid #3d4147',
           borderRadius: '12px',
           width: '100%',
           maxWidth: '520px',
@@ -169,24 +160,24 @@ export default function SettingsModal({ onClose }: Props) {
       >
         {/* Header */}
         <div
+          className="border-b border-border"
           style={{
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'space-between',
             padding: '20px 24px 16px',
-            borderBottom: '1px solid #3d4147',
           }}
         >
-          <h2 style={{ fontSize: '16px', fontWeight: 600, color: '#f9fafb', margin: 0 }}>
+          <h2 className="text-text" style={{ fontSize: '16px', fontWeight: 600, margin: 0 }}>
             Settings
           </h2>
           <button
             onClick={onClose}
+            className="text-muted"
             style={{
               background: 'none',
               border: 'none',
               cursor: 'pointer',
-              color: '#9ca3af',
               padding: '4px',
               display: 'flex',
               alignItems: 'center',
@@ -200,14 +191,14 @@ export default function SettingsModal({ onClose }: Props) {
         {/* Body */}
         <div style={{ padding: '24px' }}>
           {loading ? (
-            <p style={{ color: '#9ca3af', fontSize: '14px', textAlign: 'center', padding: '32px 0' }}>
+            <p className="text-muted" style={{ fontSize: '14px', textAlign: 'center', padding: '32px 0' }}>
               Loading…
             </p>
           ) : (
             <>
               {/* Appearance section */}
               <section style={{ marginBottom: '32px' }}>
-                <h3 style={sectionHeadingStyle}>Appearance</h3>
+                <h3 style={sectionHeadingStyle} className="text-stopped">Appearance</h3>
                 <div style={{ display: 'flex', gap: '12px' }}>
                   <ThemeCard
                     id="system"
@@ -235,33 +226,19 @@ export default function SettingsModal({ onClose }: Props) {
 
               {/* Tools section */}
               <section style={{ marginBottom: '24px' }}>
-                <h3 style={sectionHeadingStyle}>Tools</h3>
-                <div
-                  style={{
-                    backgroundColor: '#242830',
-                    border: '1px solid #3d4147',
-                    borderRadius: '8px',
-                    overflow: 'hidden',
-                  }}
-                >
+                <h3 style={sectionHeadingStyle} className="text-stopped">Tools</h3>
+                <div className="bg-card border border-border" style={{ borderRadius: '8px', overflow: 'hidden' }}>
                   {/* Code editor */}
                   <div
+                    className="border-b border-border"
                     style={{
                       display: 'flex',
                       alignItems: 'center',
                       padding: '14px 16px',
-                      borderBottom: '1px solid #3d4147',
                       gap: '16px',
                     }}
                   >
-                    <label
-                      style={{
-                        fontSize: '13px',
-                        color: '#9ca3af',
-                        width: '130px',
-                        flexShrink: 0,
-                      }}
-                    >
+                    <label className="text-muted" style={{ fontSize: '13px', width: '130px', flexShrink: 0 }}>
                       Code editor
                     </label>
                     <AppDropdown
@@ -281,14 +258,7 @@ export default function SettingsModal({ onClose }: Props) {
                       gap: '16px',
                     }}
                   >
-                    <label
-                      style={{
-                        fontSize: '13px',
-                        color: '#9ca3af',
-                        width: '130px',
-                        flexShrink: 0,
-                      }}
-                    >
+                    <label className="text-muted" style={{ fontSize: '13px', width: '130px', flexShrink: 0 }}>
                       Terminal application
                     </label>
                     <AppDropdown
@@ -304,17 +274,16 @@ export default function SettingsModal({ onClose }: Props) {
           )}
 
           {error && (
-            <p style={{ fontSize: '13px', color: '#f87171', marginBottom: '16px' }}>{error}</p>
+            <p className="text-red-400" style={{ fontSize: '13px', marginBottom: '16px' }}>{error}</p>
           )}
 
           {/* Footer buttons */}
           <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '8px' }}>
             <button
               onClick={onClose}
+              className="text-muted border border-border"
               style={{
                 backgroundColor: 'transparent',
-                border: '1px solid #3d4147',
-                color: '#9ca3af',
                 borderRadius: '6px',
                 padding: '8px 16px',
                 fontSize: '13px',
@@ -327,10 +296,9 @@ export default function SettingsModal({ onClose }: Props) {
             <button
               onClick={handleSave}
               disabled={saving || loading}
+              className="bg-accent text-white"
               style={{
-                backgroundColor: '#e05a2b',
                 border: 'none',
-                color: '#fff',
                 borderRadius: '6px',
                 padding: '8px 16px',
                 fontSize: '13px',
@@ -366,6 +334,7 @@ function ThemeCard({
   return (
     <button
       onClick={() => onSelect(id)}
+      className="bg-bg"
       style={{
         flex: 1,
         display: 'flex',
@@ -373,15 +342,14 @@ function ThemeCard({
         alignItems: 'center',
         gap: '8px',
         padding: '12px',
-        backgroundColor: '#1a1d20',
-        border: `2px solid ${selected ? '#e05a2b' : '#3d4147'}`,
+        border: `2px solid ${selected ? 'var(--color-accent)' : 'var(--color-border)'}`,
         borderRadius: '8px',
         cursor: 'pointer',
         transition: 'border-color 0.15s',
       }}
     >
       {preview}
-      <span style={{ fontSize: '12px', color: selected ? '#f9fafb' : '#9ca3af', fontWeight: selected ? 600 : 400 }}>
+      <span className={selected ? 'text-text' : 'text-muted'} style={{ fontSize: '12px', fontWeight: selected ? 600 : 400 }}>
         {label}
       </span>
     </button>
@@ -399,8 +367,8 @@ function SystemPreview() {
         display: 'flex',
       }}
     >
-      <div style={{ flex: 1, backgroundColor: '#1a1d20' }} />
-      <div style={{ flex: 1, backgroundColor: '#f3f4f6' }} />
+      <div className="bg-bg" style={{ flex: 1 }} />
+      <div style={{ flex: 1, backgroundColor: 'var(--color-border)' }} />
     </div>
   );
 }
@@ -412,8 +380,8 @@ function LightPreview() {
         width: '100%',
         height: '56px',
         borderRadius: '4px',
-        backgroundColor: '#f3f4f6',
-        border: '1px solid #e5e7eb',
+        backgroundColor: 'var(--color-card)',
+        border: '1px solid var(--color-border)',
       }}
     />
   );
@@ -422,11 +390,11 @@ function LightPreview() {
 function DarkPreview() {
   return (
     <div
+      className="bg-bg"
       style={{
         width: '100%',
         height: '56px',
         borderRadius: '4px',
-        backgroundColor: '#1a1d20',
       }}
     />
   );
@@ -449,11 +417,9 @@ function AppDropdown({
     <select
       value={value}
       onChange={(e) => onChange(e.target.value)}
+      className="bg-bg text-text border border-border"
       style={{
         flex: 1,
-        backgroundColor: '#1a1d20',
-        color: '#f9fafb',
-        border: '1px solid #3d4147',
         borderRadius: '6px',
         padding: '7px 10px',
         fontSize: '13px',
@@ -467,10 +433,8 @@ function AppDropdown({
           key={opt.id}
           value={opt.id}
           disabled={!opt.available}
-          style={{
-            color: opt.available ? '#f9fafb' : '#6b7280',
-            backgroundColor: '#1a1d20',
-          }}
+          className={opt.available ? 'text-text' : 'text-stopped'}
+          style={{ backgroundColor: 'var(--color-bg)' }}
         >
           {opt.available ? opt.label : `${opt.label} (not installed)`}
         </option>
@@ -491,7 +455,6 @@ function applyTheme(theme: Theme) {
 const sectionHeadingStyle: React.CSSProperties = {
   fontSize: '11px',
   fontWeight: 600,
-  color: '#6b7280',
   textTransform: 'uppercase',
   letterSpacing: '0.06em',
   marginBottom: '12px',

@@ -70,7 +70,7 @@ export default function SiteDetail({ slug, onStatusChange, onDeleted }: Props) {
   if (isLoading) {
     return (
       <div className="flex items-center justify-center h-full">
-        <span className="text-sm" style={{ color: '#9ca3af' }}>Loading...</span>
+        <span className="text-sm text-muted">Loading...</span>
       </div>
     );
   }
@@ -78,7 +78,7 @@ export default function SiteDetail({ slug, onStatusChange, onDeleted }: Props) {
   if (error || !site) {
     return (
       <div className="flex items-center justify-center h-full">
-        <span className="text-sm" style={{ color: '#9ca3af' }}>Failed to load site.</span>
+        <span className="text-sm text-muted">Failed to load site.</span>
       </div>
     );
   }
@@ -97,18 +97,18 @@ export default function SiteDetail({ slug, onStatusChange, onDeleted }: Props) {
   return (
     <div className="flex flex-col h-full">
       {/* Header */}
-      <div className="px-8 pt-8 pb-0 border-b" style={{ borderColor: '#3d4147' }}>
+      <div className="px-8 pt-8 pb-0 border-b border-border">
         <div className="flex items-start justify-between mb-4">
           <div>
-            <h1 className="text-2xl font-semibold" style={{ color: '#f9fafb' }}>
+            <h1 className="text-2xl font-semibold text-text">
               {site.name}
             </h1>
             <div className="flex items-center gap-2 mt-1">
               <span
                 className="w-2 h-2 rounded-full flex-shrink-0"
-                style={{ backgroundColor: isRunning ? '#e05a2b' : '#6b7280' }}
+                style={{ backgroundColor: isRunning ? 'var(--color-accent)' : 'var(--color-stopped)' }}
               />
-              <span className="text-sm" style={{ color: '#9ca3af' }}>
+              <span className="text-sm text-muted">
                 {isRunning ? 'Running' : 'Stopped'}
               </span>
             </div>
@@ -121,8 +121,7 @@ export default function SiteDetail({ slug, onStatusChange, onDeleted }: Props) {
                 href={site.url}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="flex items-center gap-2 px-3 py-1.5 rounded text-sm font-medium"
-                style={{ backgroundColor: '#3d4147', color: '#f9fafb' }}
+                className="flex items-center gap-2 px-3 py-1.5 rounded text-sm font-medium bg-border text-text"
               >
                 <ExternalLink size={13} />
                 Open site
@@ -133,8 +132,7 @@ export default function SiteDetail({ slug, onStatusChange, onDeleted }: Props) {
                 href={wpAdminUrl}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="flex items-center gap-2 px-3 py-1.5 rounded text-sm font-medium"
-                style={{ backgroundColor: '#3d4147', color: '#f9fafb' }}
+                className="flex items-center gap-2 px-3 py-1.5 rounded text-sm font-medium bg-border text-text"
               >
                 WP Admin
               </a>
@@ -143,8 +141,7 @@ export default function SiteDetail({ slug, onStatusChange, onDeleted }: Props) {
               <button
                 onClick={handleStop}
                 disabled={actionLoading}
-                className="px-3 py-1.5 rounded text-sm font-medium disabled:opacity-50"
-                style={{ backgroundColor: '#3d4147', color: '#f9fafb' }}
+                className="px-3 py-1.5 rounded text-sm font-medium disabled:opacity-50 bg-border text-text"
               >
                 {actionLoading ? 'Stopping...' : 'Stop'}
               </button>
@@ -152,8 +149,7 @@ export default function SiteDetail({ slug, onStatusChange, onDeleted }: Props) {
               <button
                 onClick={handleStart}
                 disabled={actionLoading}
-                className="px-3 py-1.5 rounded text-sm font-medium disabled:opacity-50"
-                style={{ backgroundColor: '#e05a2b', color: '#fff' }}
+                className="px-3 py-1.5 rounded text-sm font-medium disabled:opacity-50 bg-accent text-white"
               >
                 {actionLoading ? 'Starting...' : 'Start'}
               </button>
@@ -162,7 +158,7 @@ export default function SiteDetail({ slug, onStatusChange, onDeleted }: Props) {
         </div>
 
         {actionError && (
-          <p className="text-sm mb-3" style={{ color: '#f87171' }}>{actionError}</p>
+          <p className="text-sm mb-3 text-red-400">{actionError}</p>
         )}
 
         {/* Tabs */}
@@ -173,11 +169,12 @@ export default function SiteDetail({ slug, onStatusChange, onDeleted }: Props) {
               onClick={() => setActiveTab(tab.id)}
               className="px-4 py-2.5 text-sm font-medium border-b-2 transition-colors"
               style={{
-                borderColor: activeTab === tab.id ? '#e05a2b' : 'transparent',
-                color: activeTab === tab.id ? '#f9fafb' : '#9ca3af',
+                borderColor: activeTab === tab.id ? 'var(--color-accent)' : 'transparent',
               }}
             >
-              {tab.label}
+              <span className={activeTab === tab.id ? 'text-text' : 'text-muted'}>
+                {tab.label}
+              </span>
             </button>
           ))}
         </div>
@@ -250,7 +247,6 @@ function OverviewTab({ site, isRunning, wpAdminUrl }: OverviewTabProps) {
   const [terminalLabel, setTerminalLabel] = useState('Terminal');
 
   useEffect(() => {
-    // Fetch config and environment together — use detected app labels, not a static map
     Promise.all([
       fetch('/api/config').then(r => r.json()),
       fetch('/api/environment').then(r => r.json()),
@@ -287,11 +283,10 @@ function OverviewTab({ site, isRunning, wpAdminUrl }: OverviewTabProps) {
       {/* Left: Theme screenshot */}
       <div style={{ flexShrink: 0, width: '160px' }}>
         <div
+          className="bg-card border border-border"
           style={{
             width: '160px',
             height: '200px',
-            backgroundColor: '#242830',
-            border: '1px solid #3d4147',
             borderRadius: '6px',
             overflow: 'hidden',
           }}
@@ -308,12 +303,12 @@ function OverviewTab({ site, isRunning, wpAdminUrl }: OverviewTabProps) {
                 parent.style.display = 'flex';
                 parent.style.alignItems = 'center';
                 parent.style.justifyContent = 'center';
-                parent.innerHTML = '<span style="font-size:12px;color:#6b7280">No preview</span>';
+                parent.innerHTML = '<span style="font-size:12px;color:var(--color-stopped)">No preview</span>';
               }
             }}
           />
         </div>
-        <p style={{ fontSize: '12px', color: '#9ca3af', marginTop: '8px', textAlign: 'center' }}>
+        <p className="text-muted" style={{ fontSize: '12px', marginTop: '8px', textAlign: 'center' }}>
           Active theme
         </p>
       </div>
@@ -323,7 +318,7 @@ function OverviewTab({ site, isRunning, wpAdminUrl }: OverviewTabProps) {
 
         {/* Customize section */}
         <section>
-          <h2 style={{ fontSize: '13px', fontWeight: 600, color: '#9ca3af', marginBottom: '10px' }}>
+          <h2 className="text-muted" style={{ fontSize: '13px', fontWeight: 600, marginBottom: '10px' }}>
             Customize
           </h2>
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
@@ -344,7 +339,7 @@ function OverviewTab({ site, isRunning, wpAdminUrl }: OverviewTabProps) {
 
         {/* Open in... section */}
         <section>
-          <h2 style={{ fontSize: '13px', fontWeight: 600, color: '#9ca3af', marginBottom: '10px' }}>
+          <h2 className="text-muted" style={{ fontSize: '13px', fontWeight: 600, marginBottom: '10px' }}>
             Open in...
           </h2>
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
@@ -383,19 +378,12 @@ interface InfoCardProps {
 
 function InfoCard({ label, value, isLink, mono, copyable }: InfoCardProps) {
   return (
-    <div
-      style={{
-        backgroundColor: '#242830',
-        border: '1px solid #3d4147',
-        borderRadius: '8px',
-        padding: '16px',
-      }}
-    >
+    <div className="bg-card border border-border" style={{ borderRadius: '8px', padding: '16px' }}>
       <p
+        className="text-stopped"
         style={{
           fontSize: '11px',
           fontWeight: 600,
-          color: '#6b7280',
           textTransform: 'uppercase',
           letterSpacing: '0.06em',
           marginBottom: '8px',
@@ -409,9 +397,9 @@ function InfoCard({ label, value, isLink, mono, copyable }: InfoCardProps) {
             href={value}
             target="_blank"
             rel="noopener noreferrer"
+            className="text-accent"
             style={{
               fontSize: '14px',
-              color: '#e05a2b',
               textDecoration: 'underline',
               fontFamily: mono ? 'monospace' : undefined,
               wordBreak: 'break-all',
@@ -421,9 +409,9 @@ function InfoCard({ label, value, isLink, mono, copyable }: InfoCardProps) {
           </a>
         ) : (
           <span
+            className="text-text"
             style={{
               fontSize: '14px',
-              color: '#f9fafb',
               fontFamily: mono ? 'monospace' : undefined,
               wordBreak: 'break-all',
             }}
@@ -489,8 +477,8 @@ function SettingsTab({ slug, site, wpAdminUrl, onSaved, onDeleteClick }: Setting
     <div style={{ display: 'flex', flexDirection: 'column', gap: '32px', maxWidth: '560px' }}>
       {/* Site information */}
       <section>
-        <h2 style={sectionHeadingStyle}>Site information</h2>
-        <div style={cardStyle}>
+        <h2 style={sectionHeadingStyle} className="text-muted">Site information</h2>
+        <div style={cardStyle} className="bg-card border border-border">
           {/* Site name — inline editable */}
           <SettingsRow label="Site name">
             {editingName ? (
@@ -500,11 +488,9 @@ function SettingsTab({ slug, site, wpAdminUrl, onSaved, onDeleteClick }: Setting
                   value={nameValue}
                   onChange={(e) => setNameValue(e.target.value)}
                   onKeyDown={(e) => { if (e.key === 'Enter') handleNameSave(); if (e.key === 'Escape') { setEditingName(false); setNameValue(site.name); } }}
+                  className="bg-bg text-text border border-border"
                   style={{
                     flex: 1,
-                    backgroundColor: '#1a1d20',
-                    color: '#f9fafb',
-                    border: '1px solid #3d4147',
                     borderRadius: '5px',
                     padding: '4px 8px',
                     fontSize: '13px',
@@ -513,40 +499,43 @@ function SettingsTab({ slug, site, wpAdminUrl, onSaved, onDeleteClick }: Setting
                 <button
                   onClick={handleNameSave}
                   disabled={nameSaving}
-                  style={{ ...smallButtonStyle, backgroundColor: '#e05a2b' }}
+                  className="bg-accent text-white"
+                  style={{ ...smallButtonStyle }}
                 >
                   {nameSaving ? '…' : 'Save'}
                 </button>
                 <button
                   onClick={() => { setEditingName(false); setNameValue(site.name); }}
-                  style={{ ...smallButtonStyle, backgroundColor: '#3d4147' }}
+                  className="bg-border text-white"
+                  style={{ ...smallButtonStyle }}
                 >
                   Cancel
                 </button>
               </div>
             ) : (
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flex: 1 }}>
-                <span style={valueStyle}>{site.name}</span>
+                <span style={valueStyle} className="text-text">{site.name}</span>
                 <button
                   onClick={() => setEditingName(true)}
-                  style={{ fontSize: '11px', color: '#6b7280', background: 'none', border: 'none', cursor: 'pointer', padding: '0 4px' }}
+                  className="text-stopped"
+                  style={{ fontSize: '11px', background: 'none', border: 'none', cursor: 'pointer', padding: '0 4px' }}
                 >
                   Edit
                 </button>
               </div>
             )}
-            {nameError && <span style={{ fontSize: '12px', color: '#f87171' }}>{nameError}</span>}
+            {nameError && <span className="text-red-400" style={{ fontSize: '12px' }}>{nameError}</span>}
           </SettingsRow>
 
           {site.url && (
             <SettingsRow label="Local URL">
-              <span style={valueStyle}>{site.url}</span>
+              <span style={valueStyle} className="text-text">{site.url}</span>
               <CopyButton value={site.url} />
             </SettingsRow>
           )}
 
           <SettingsRow label="Local path" last>
-            <span style={{ ...valueStyle, fontFamily: 'monospace', fontSize: '12px' }}>{site.path ?? '—'}</span>
+            <span className="text-text" style={{ ...valueStyle, fontFamily: 'monospace', fontSize: '12px' }}>{site.path ?? '—'}</span>
             {site.path && <CopyButton value={site.path} />}
           </SettingsRow>
         </div>
@@ -554,33 +543,34 @@ function SettingsTab({ slug, site, wpAdminUrl, onSaved, onDeleteClick }: Setting
 
       {/* WP Admin */}
       <section>
-        <h2 style={sectionHeadingStyle}>WP Admin</h2>
-        <div style={cardStyle}>
+        <h2 style={sectionHeadingStyle} className="text-muted">WP Admin</h2>
+        <div style={cardStyle} className="bg-card border border-border">
           {wpAdminUrl && (
             <SettingsRow label="Admin URL">
-              <span style={valueStyle}>{wpAdminUrl}</span>
+              <span style={valueStyle} className="text-text">{wpAdminUrl}</span>
               <CopyButton value={wpAdminUrl} />
             </SettingsRow>
           )}
           <SettingsRow label="Username">
-            <span style={valueStyle}>{adminUsername}</span>
+            <span style={valueStyle} className="text-text">{adminUsername}</span>
             <CopyButton value={adminUsername} />
           </SettingsRow>
           <SettingsRow label="Password">
-            <span style={valueStyle}>
+            <span style={valueStyle} className="text-text">
               {showPassword ? adminPassword : '••••••••'}
             </span>
             <button
               onClick={() => setShowPassword((v) => !v)}
               title={showPassword ? 'Hide password' : 'Show password'}
-              style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#6b7280', padding: '2px 4px', display: 'flex', alignItems: 'center' }}
+              className="text-stopped"
+              style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '2px 4px', display: 'flex', alignItems: 'center' }}
             >
               {showPassword ? <EyeOff size={13} /> : <Eye size={13} />}
             </button>
             <CopyButton value={adminPassword} />
           </SettingsRow>
           <SettingsRow label="Email" last>
-            <span style={valueStyle}>{adminEmail}</span>
+            <span style={valueStyle} className="text-text">{adminEmail}</span>
             <CopyButton value={adminEmail} />
           </SettingsRow>
         </div>
@@ -588,17 +578,16 @@ function SettingsTab({ slug, site, wpAdminUrl, onSaved, onDeleteClick }: Setting
 
       {/* Staging configuration */}
       <section>
-        <h2 style={sectionHeadingStyle}>Staging configuration</h2>
+        <h2 style={sectionHeadingStyle} className="text-muted">Staging configuration</h2>
         <SiteSettingsPanel slug={slug} staging={site.staging} onSaved={onSaved} />
       </section>
 
       {/* Danger zone */}
       <section>
-        <h2 style={{ ...sectionHeadingStyle, color: '#f87171' }}>Danger zone</h2>
+        <h2 style={sectionHeadingStyle} className="text-red-400">Danger zone</h2>
         <div
+          className="bg-card border border-border"
           style={{
-            backgroundColor: '#242830',
-            border: '1px solid #3d4147',
             borderRadius: '8px',
             padding: '16px 20px',
             display: 'flex',
@@ -607,8 +596,8 @@ function SettingsTab({ slug, site, wpAdminUrl, onSaved, onDeleteClick }: Setting
           }}
         >
           <div>
-            <p style={{ fontSize: '14px', fontWeight: 500, color: '#f9fafb', marginBottom: '2px' }}>Delete site</p>
-            <p style={{ fontSize: '12px', color: '#9ca3af' }}>Permanently remove this site and optionally its files.</p>
+            <p className="text-text" style={{ fontSize: '14px', fontWeight: 500, marginBottom: '2px' }}>Delete site</p>
+            <p className="text-muted" style={{ fontSize: '12px' }}>Permanently remove this site and optionally its files.</p>
           </div>
           <button
             onClick={onDeleteClick}
@@ -644,28 +633,23 @@ function SettingsTab({ slug, site, wpAdminUrl, onSaved, onDeleteClick }: Setting
 const sectionHeadingStyle: React.CSSProperties = {
   fontSize: '13px',
   fontWeight: 600,
-  color: '#9ca3af',
   textTransform: 'uppercase',
   letterSpacing: '0.05em',
   marginBottom: '12px',
 };
 
 const cardStyle: React.CSSProperties = {
-  backgroundColor: '#242830',
-  border: '1px solid #3d4147',
   borderRadius: '8px',
   overflow: 'hidden',
 };
 
 const valueStyle: React.CSSProperties = {
   fontSize: '13px',
-  color: '#f9fafb',
   flex: 1,
   wordBreak: 'break-all',
 };
 
 const smallButtonStyle: React.CSSProperties = {
-  color: '#fff',
   border: 'none',
   borderRadius: '4px',
   padding: '4px 10px',
@@ -689,16 +673,14 @@ function QuickActionButton({
   onClick?: () => void;
   disabled?: boolean;
 }) {
+  const baseClass = `bg-card border border-border ${disabled ? 'text-stopped' : 'text-text'}`;
   const style: React.CSSProperties = {
     display: 'flex',
     alignItems: 'center',
     gap: '8px',
     padding: '10px 14px',
-    backgroundColor: '#242830',
-    border: '1px solid #3d4147',
     borderRadius: '6px',
     fontSize: '13px',
-    color: disabled ? '#6b7280' : '#f9fafb',
     cursor: disabled ? 'not-allowed' : 'pointer',
     textDecoration: 'none',
     fontWeight: 500,
@@ -707,14 +689,14 @@ function QuickActionButton({
 
   if (href && !disabled) {
     return (
-      <a href={href} target="_blank" rel="noopener noreferrer" style={style}>
+      <a href={href} target="_blank" rel="noopener noreferrer" className={baseClass} style={style}>
         {icon}{label}
       </a>
     );
   }
 
   return (
-    <button onClick={disabled ? undefined : onClick} disabled={disabled} style={{ ...style, width: '100%', border: '1px solid #3d4147' }}>
+    <button onClick={disabled ? undefined : onClick} disabled={disabled} className={baseClass} style={{ ...style, width: '100%' }}>
       {icon}{label}
     </button>
   );
@@ -738,13 +720,13 @@ function SettingsRow({
         alignItems: 'center',
         gap: '12px',
         padding: '12px 16px',
-        borderBottom: last ? 'none' : '1px solid #3d4147',
+        borderBottom: last ? 'none' : '1px solid var(--color-border)',
       }}
     >
       <span
+        className="text-muted"
         style={{
           fontSize: '13px',
-          color: '#9ca3af',
           width: '110px',
           flexShrink: 0,
         }}

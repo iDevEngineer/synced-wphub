@@ -30,7 +30,7 @@ export default function SiteList({ selectedSlug, onSelect }: Props) {
 
   if (isLoading) {
     return (
-      <div className="px-4 py-6 text-sm" style={{ color: '#9ca3af' }}>
+      <div className="px-4 py-6 text-sm text-muted">
         Loading sites...
       </div>
     );
@@ -38,7 +38,7 @@ export default function SiteList({ selectedSlug, onSelect }: Props) {
 
   if (error) {
     return (
-      <div className="px-4 py-6 text-sm" style={{ color: '#9ca3af' }}>
+      <div className="px-4 py-6 text-sm text-muted">
         Failed to load sites.
       </div>
     );
@@ -48,11 +48,10 @@ export default function SiteList({ selectedSlug, onSelect }: Props) {
 
   return (
     <div className="flex flex-col h-full">
-      <div className="px-4 py-3 border-b" style={{ borderColor: '#3d4147' }}>
+      <div className="px-4 py-3 border-b border-border">
         <button
           onClick={() => setShowCreateModal(true)}
-          className="flex items-center gap-2 w-full text-sm px-3 py-2 rounded font-medium transition-colors"
-          style={{ backgroundColor: '#e05a2b', color: '#fff' }}
+          className="flex items-center gap-2 w-full text-sm px-3 py-2 rounded font-medium transition-colors bg-accent text-white"
         >
           <Plus size={14} />
           Create site
@@ -62,10 +61,10 @@ export default function SiteList({ selectedSlug, onSelect }: Props) {
       <div className="flex-1 overflow-y-auto py-2">
         {sites.length === 0 ? (
           <div className="px-4 py-6 text-center">
-            <p className="text-sm font-medium mb-1" style={{ color: '#f9fafb' }}>
+            <p className="text-sm font-medium mb-1 text-text">
               No sites yet.
             </p>
-            <p className="text-xs leading-relaxed" style={{ color: '#9ca3af' }}>
+            <p className="text-xs leading-relaxed text-muted">
               Create your first site to get started. Synced handles the scaffolding, GitHub setup, and
               deployment config automatically.
             </p>
@@ -104,20 +103,20 @@ function SiteRow({ site, isSelected, onClick }: { site: Site; isSelected: boolea
       )}
       style={{
         backgroundColor: isSelected ? 'rgba(224, 90, 43, 0.12)' : undefined,
-        borderLeft: isSelected ? '2px solid #e05a2b' : '2px solid transparent',
+        borderLeft: isSelected ? '2px solid var(--color-accent)' : '2px solid transparent',
       }}
     >
       <div className="flex items-center gap-2">
         <span
           className="flex-shrink-0 w-2 h-2 rounded-full"
-          style={{ backgroundColor: isRunning ? '#e05a2b' : '#6b7280' }}
+          style={{ backgroundColor: isRunning ? 'var(--color-accent)' : 'var(--color-stopped)' }}
         />
-        <span className="text-sm font-medium truncate" style={{ color: '#f9fafb' }}>
+        <span className="text-sm font-medium truncate text-text">
           {site.name}
         </span>
       </div>
       {isRunning && site.url && (
-        <p className="text-xs mt-1 ml-4 truncate" style={{ color: '#9ca3af' }}>
+        <p className="text-xs mt-1 ml-4 truncate text-muted">
           {site.url}
         </p>
       )}

@@ -56,7 +56,7 @@ export default function SettingsForm() {
 
   if (loading) {
     return (
-      <p className="text-sm" style={{ color: '#9ca3af' }}>
+      <p className="text-sm text-muted">
         Loading settings...
       </p>
     );
@@ -66,7 +66,7 @@ export default function SettingsForm() {
     <form onSubmit={handleSubmit} className="space-y-8">
       {/* Section 1: Local environment */}
       <section>
-        <h2 className="text-sm font-semibold uppercase tracking-wider mb-4" style={{ color: '#9ca3af' }}>
+        <h2 className="text-sm font-semibold uppercase tracking-wider mb-4 text-muted">
           Local environment
         </h2>
         <div className="space-y-4">
@@ -85,11 +85,11 @@ export default function SettingsForm() {
         </div>
       </section>
 
-      <div className="border-t" style={{ borderColor: '#3d4147' }} />
+      <div className="border-t border-border" />
 
       {/* Section 2: Git and GitHub */}
       <section>
-        <h2 className="text-sm font-semibold uppercase tracking-wider mb-4" style={{ color: '#9ca3af' }}>
+        <h2 className="text-sm font-semibold uppercase tracking-wider mb-4 text-muted">
           Git and GitHub
         </h2>
         <Field
@@ -100,26 +100,21 @@ export default function SettingsForm() {
         />
       </section>
 
-      <div className="border-t" style={{ borderColor: '#3d4147' }} />
+      <div className="border-t border-border" />
 
       {/* Section 3: Defaults */}
       <section>
-        <h2 className="text-sm font-semibold uppercase tracking-wider mb-4" style={{ color: '#9ca3af' }}>
+        <h2 className="text-sm font-semibold uppercase tracking-wider mb-4 text-muted">
           Defaults
         </h2>
         <div>
-          <label className="block text-sm mb-1" style={{ color: '#f9fafb' }}>
+          <label className="block text-sm mb-1 text-text">
             Default hosting provider
           </label>
           <select
             value={config.defaultProvider ?? 'generic'}
             onChange={(e) => setConfig({ ...config, defaultProvider: e.target.value })}
-            className="w-full px-3 py-2 rounded text-sm border"
-            style={{
-              backgroundColor: '#2b2f33',
-              borderColor: '#3d4147',
-              color: '#f9fafb',
-            }}
+            className="w-full px-3 py-2 rounded text-sm border bg-surface border-border text-text"
           >
             {PROVIDERS.map((p) => (
               <option key={p.value} value={p.value}>
@@ -135,18 +130,17 @@ export default function SettingsForm() {
         <button
           type="submit"
           disabled={saving}
-          className="px-4 py-2 rounded text-sm font-medium transition-colors disabled:opacity-50"
-          style={{ backgroundColor: '#e05a2b', color: '#fff' }}
+          className="px-4 py-2 rounded text-sm font-medium transition-colors disabled:opacity-50 bg-accent text-white"
         >
           {saving ? 'Saving...' : 'Save settings'}
         </button>
         {saved && (
-          <span className="text-sm" style={{ color: '#34d399' }}>
+          <span className="text-sm text-green-400">
             Settings saved.
           </span>
         )}
         {error && (
-          <span className="text-sm" style={{ color: '#f87171' }}>
+          <span className="text-sm text-red-400">
             {error}
           </span>
         )}
@@ -168,7 +162,7 @@ function Field({
 }) {
   return (
     <div>
-      <label className="block text-sm mb-1" style={{ color: '#f9fafb' }}>
+      <label className="block text-sm mb-1 text-text">
         {label}
       </label>
       <input
@@ -176,12 +170,7 @@ function Field({
         value={value}
         onChange={(e) => onChange(e.target.value)}
         placeholder={placeholder}
-        className="w-full px-3 py-2 rounded text-sm border"
-        style={{
-          backgroundColor: '#2b2f33',
-          borderColor: '#3d4147',
-          color: '#f9fafb',
-        }}
+        className="w-full px-3 py-2 rounded text-sm border bg-surface border-border text-text"
       />
     </div>
   );
