@@ -6,7 +6,6 @@ import { execa } from 'execa';
 
 function getConfig() {
   try {
-    const { slug } = await params;
     return JSON.parse(readFileSync(path.join(homedir(), '.synced', 'config.json'), 'utf-8'));
   } catch { return { sitesPath: path.join(homedir(), 'Synced-Sites') }; }
 }
