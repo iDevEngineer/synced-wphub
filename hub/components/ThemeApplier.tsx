@@ -9,8 +9,8 @@ export default function ThemeApplier() {
         const res = await fetch('/api/config');
         if (!res.ok) return;
         const data = await res.json();
-        // Handle both { theme } and { config: { theme } } response shapes
-        const theme: string = (data.theme as string) ?? (data.config?.theme as string) ?? 'dark';
+        // Config is nested under data.config
+        const theme: string = (data.config?.theme as string) ?? 'dark';
         document.documentElement.setAttribute('data-theme', theme);
         document.body.setAttribute('data-theme', theme);
       } catch {
@@ -19,7 +19,7 @@ export default function ThemeApplier() {
     }
     applyTheme();
 
-    // Listen for theme changes dispatched by SettingsModal
+    // Listen for live theme changes from SettingsModal
     const handler = (e: Event) => {
       const theme = (e as CustomEvent).detail;
       document.documentElement.setAttribute('data-theme', theme);

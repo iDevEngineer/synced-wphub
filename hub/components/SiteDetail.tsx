@@ -255,7 +255,8 @@ function OverviewTab({ site, isRunning, wpAdminUrl }: OverviewTabProps) {
   const [terminalLabel, setTerminalLabel] = useState('Terminal');
 
   useEffect(() => {
-    fetch('/api/config').then(r => r.json()).then(cfg => {
+    fetch('/api/config').then(r => r.json()).then(data => {
+      const cfg = data.config ?? data;
       if (cfg.codeEditor) setEditorLabel(EDITOR_LABELS[cfg.codeEditor] ?? 'Editor');
       if (cfg.terminal) setTerminalLabel(TERMINAL_LABELS[cfg.terminal] ?? 'Terminal');
     }).catch(() => {});

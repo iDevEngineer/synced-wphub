@@ -1,14 +1,14 @@
 import { NextRequest } from 'next/server';
 import { homedir } from 'os';
 import path from 'path';
-import { readFileSync } from 'fs';
+import { readFileSync, readdirSync } from 'fs';
 import { execa } from 'execa';
 
 function getConfig() {
   try {
     return JSON.parse(readFileSync(path.join(homedir(), '.synced', 'config.json'), 'utf-8'));
   } catch {
-    return { sitesPath: path.join(homedir(), 'Synced-Sites') };
+    return {};
   }
 }
 
@@ -16,22 +16,14 @@ function toSlug(name: string) {
   return name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
 }
 
-async function openInEditor(editor: string, sitePath: string) {
-  switch (editor) {
-    case 'vscode':
-      return execa('code', [sitePath]);
-    case 'cursor':
-      return execa('cursor', [sitePath]);
-    case 'zed':
-      return execa('zed', [sitePath]);
-    case 'phpstorm':
-      return execa('open', ['-a', 'PhpStorm', sitePath]);
-    case 'sublime':
-      return execa('subl', [sitePath]);
-    default:
-      return execa('open', [sitePath]);
-  }
-}
+// Use 'open -a AppName path' — more reliable than CLI shims on macOS
+const EDITOR_APPS: Record<string, string> = {
+  vscode:    'Visual Studio Code',
+  cursor:    'Cursor',
+  zed:       'Zed',
+  phpstorm:  'PhpStorm',
+  sublime:   'Sublime Text',
+};
 
 export async function POST(
   _req: NextRequest,
@@ -40,17 +32,21 @@ export async function POST(
   try {
     const config = getConfig();
     const sitesPath = (config.sitesPath ?? path.join(homedir(), 'Synced-Sites')).replace(/^~/, homedir());
-    const { readdirSync } = await import('fs');
     const dirs = readdirSync(sitesPath);
     const match = dirs.find((d: string) => toSlug(d) === params.slug) ?? params.slug;
     const sitePath = path.join(sitesPath, match);
 
-    const editor: string = config.codeEditor ?? '';
+    const editorId: string = config.codeEditor ?? '';
+    const appName = EDITOR_APPS[editorId];
 
     try {
-      await openInEditor(editor, sitePath);
+      if (appName) {
+        await execa('open', ['-a', appName, sitePath]);
+      } else {
+        // Nothing configured — open Finder as fallback
+        await execa('open', [sitePath]);
+      }
     } catch {
-      // If the configured editor fails, fall back to system open
       await execa('open', [sitePath]);
     }
 
