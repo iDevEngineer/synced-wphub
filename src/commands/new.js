@@ -143,7 +143,38 @@ export async function newCommand(clientName) {
   );
   logger.step('Created blueprint.json');
 
-  // 7. Git init locally — dev creates GitHub repo when ready
+  // 7. Write .gitignore before git init
+  const gitignore = [
+    '# WordPress core — do not commit',
+    'wp-admin/',
+    'wp-includes/',
+    'wp-config.php',
+    '',
+    '# SQLite database',
+    'wp-content/database/',
+    'wp-content/db.php',
+    '',
+    '# Uploads — large files, not source code',
+    'wp-content/uploads/',
+    '',
+    '# wp-now cache',
+    '.wp-env/',
+    '',
+    '# AI tooling — local only, not source code',
+    '.claude/',
+    '.cursor/',
+    '.codex/',
+    '',
+    '# Node',
+    'node_modules/',
+    '',
+    '# OS',
+    '.DS_Store',
+  ].join('\n');
+  writeFileSync(join(sitePath, '.gitignore'), gitignore, 'utf8');
+  logger.step('Created .gitignore');
+
+  // Git init locally — dev creates GitHub repo when ready
   try {
     await execa('git', ['init'], { cwd: sitePath });
     await execa('git', ['add', '.'], { cwd: sitePath });
